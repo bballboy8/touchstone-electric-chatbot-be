@@ -29,12 +29,6 @@ cd project
 
 you should have app/.env file with all environment variable needed or you can set them
 
-NAME: You can set this environment variable to customize the name displayed by the application. By default, it's set to "World".
-
-
-## Stopping the Application
-
-To stop the running Docker container, you can use the following command:
 
 
 ## Format code
