@@ -17,3 +17,7 @@ user = {
     "full_name": "Backend User",
     "_id": "60f3b3b3b3b3b3b3b3b3b3b3",
 }
+
+# Environment variables
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+

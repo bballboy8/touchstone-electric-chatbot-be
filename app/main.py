@@ -3,7 +3,8 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from routers import (
-    user_router
+    user_router,
+    health_check_router
 )
 
 
@@ -39,3 +40,6 @@ async def health_check():
 
 # Include routers
 project.include_router(user_router.router, prefix="/api", tags=["User"])
+project.include_router(health_check_router.router, prefix="/api", tags=["Health Check"])
+
+
