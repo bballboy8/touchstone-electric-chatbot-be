@@ -22,3 +22,7 @@ user = {
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 PINECONEDB_API_KEY = os.getenv("PINECONEDB_API_KEY")
 
+
+# Index 
+PINECONE_INDEX = 'openai-embedding-index'
+EMBEDDING_MODEL = "text-embedding-3-small"

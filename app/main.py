@@ -4,12 +4,13 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from routers import (
     user_router,
-    health_check_router
+    health_check_router,
+    pinecone_router
 )
-
+import services
 
 async def startup_lifespan():
-    pass
+    await services.generate_index_service()
 
 
 project = FastAPI(on_startup=[startup_lifespan])
@@ -41,5 +42,6 @@ async def health_check():
 # Include routers
 project.include_router(user_router.router, prefix="/api", tags=["User"])
 project.include_router(health_check_router.router, prefix="/api", tags=["Health Check"])
+project.include_router(pinecone_router.router, prefix="/api", tags=["Pinecone"])
 
 

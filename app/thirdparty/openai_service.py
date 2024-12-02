@@ -32,7 +32,7 @@ class OpenAIService:
         try:
             logger.info("Sending prompt to OpenAI GPT API...")
             response = await self.openai_client.chat.completions.create(
-                model="gpt-4-turbo",
+                model="gpt-4o",
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": prompt},
@@ -64,7 +64,7 @@ class OpenAIService:
                 "status_code": 500,
             }
 
-    async def test_openai_for_chat_completion(self) -> str:
+    async def test_openai_for_chat_completion(self):
         """
         Test the GPT API for Chat Completion asynchronously by sending a sample prompt.
 
@@ -92,3 +92,19 @@ class OpenAIService:
                 "message": f"An error occurred while testing the OpenAI API: {e}",
                 "status_code": 500,
             }
+    
+    async def generate_text_embeddings(self, text):
+        try:
+            embedding_model = constants.EMBEDDING_MODEL
+            response = self.openai_client.embeddings.create(
+                input=text,
+                model=embedding_model
+            )
+            return {"status_code": 200 , "embedding": response.data[0].embedding}
+        except Exception as e:
+            logger.error(f"An error occurred while Generating the embeddings via API: {e}")
+            return {
+                "message": f"An error occurred while Generating the embeddings via OpenAI API: {e}",
+                "status_code": 500,
+            }
+
