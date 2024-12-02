@@ -26,3 +26,29 @@ openai_health_check_response_schema = {
             }
         },
     }
+
+pinecone_health_check_response_schema = {
+        200: {
+            "description": "Pinecone service is healthy",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "response": "Pinecone is operational",
+                        "index": "list of pinecone indexes",
+                        "status_code": 200
+                    }
+                }
+            }
+        },
+        500: {
+            "description": "Error in Pinecone service",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "response": "Error connecting to Pinecone",
+                        "status_code": 500
+                    }
+                }
+            }
+        },
+    }

@@ -20,4 +20,5 @@ user = {
 
 # Environment variables
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+PINECONEDB_API_KEY = os.getenv("PINECONEDB_API_KEY")
 

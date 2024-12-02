@@ -17,3 +17,14 @@ async def openai_health_check():
     logger.debug("Response from OpenAI health check service")
     return response
 
+@router.get(
+    "/pineconedb",
+    response_description="Health check for Pinecone DB service",
+    responses=schemas.pinecone_health_check_response_schema
+)
+async def pinecone_health_check():
+    logger.debug("Inside pinecone health check controller")
+    response = await services.test_pinconedb_service()
+    logger.debug("Response from pinecone health check service")
+    return response
+
