@@ -1,6 +1,5 @@
 from fastapi import APIRouter
 import services
-import schemas
 from logging_module import logger
 import blueprints
 

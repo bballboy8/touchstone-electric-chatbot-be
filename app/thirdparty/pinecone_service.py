@@ -24,9 +24,9 @@ class PineConeDBService:
         try:
             response = self.pinecone_client.list_indexes()
             logger.info("Pinecone DB connection successful")
-            return {"status_code": 200, "response": list(response)}
+            return {"status_code": 200, "response": "Pinecone working properly"}
         except Exception as e:
-            logger.error("Failed to connect to Pinecone DB: %s", e)
+            logger.error(f"Failed to connect to Pinecone DB: {e}")
             return {"status_code": 500, "response": f"{e}"}
 
     async def create_index(self, index_name, dimension=1536, metric="cosine"):
@@ -85,10 +85,11 @@ class PineConeDBService:
                     continue
                 record_id = str(uuid.uuid4())
                 record_text = " ".join(
-                    f"{key.lower()}: {value}" for key, value in record.items() if value
+                    f"{value}" for _ , value in record.items() if value
                 )
                 embedding = await self._generate_embedding(record_text)
-                if embedding["response"] != 200:
+
+                if embedding["status_code"] != 200:
                     return embedding
                 embedding_value = embedding["response"]
                 upsert_list.append(

@@ -31,7 +31,7 @@ class OpenAIService:
         """
         try:
             logger.info("Sending prompt to OpenAI GPT API...")
-            response = await self.openai_client.chat.completions.create(
+            response = self.openai_client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
                     {"role": "system", "content": system_prompt},
