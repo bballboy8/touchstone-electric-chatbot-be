@@ -85,7 +85,7 @@ class PineConeDBService:
                     continue
                 record_id = str(uuid.uuid4())
                 record_text = " ".join(
-                    f"{value}" for _ , value in record.items() if value
+                    f"{value}" for _, value in record.items() if value
                 )
                 embedding = await self._generate_embedding(record_text)
 
@@ -156,4 +156,16 @@ class PineConeDBService:
             return {"status_code": 200, "response": embeddings}
         except Exception as e:
             logger.error(f"Failed to generate embedding: {e}")
+            return {"status_code": 500, "response": str(e)}
+
+    async def populate_cooked_records(self, cooked_record):
+        try:
+            index = self.pinecone_client.Index(constants.PINECONE_INDEX)
+            index.upsert(cooked_record)
+            return {
+                "status_code": 200,
+                "response": "Record upserted",
+            }
+        except Exception as e:
+            logger.error(f"Failed to Populate Cooked Record: {e}")
             return {"status_code": 500, "response": str(e)}

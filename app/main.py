@@ -5,7 +5,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from routers import (
     user_router,
     health_check_router,
-    pinecone_router
+    pinecone_router,
+    train_agent_router
 )
 import services
 
@@ -43,5 +44,7 @@ async def health_check():
 project.include_router(user_router.router, prefix="/api", tags=["User"])
 project.include_router(health_check_router.router, prefix="/api", tags=["Health Check"])
 project.include_router(pinecone_router.router, prefix="/api", tags=["Pinecone"])
+project.include_router(train_agent_router.router, prefix="/api", tags=["Train Agent"])
+
 
 

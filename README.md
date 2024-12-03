@@ -22,7 +22,14 @@ cd project
 1. Create virtual environment : virtualenv venv --python=python3.12
 2. Install requirements : pip install -r requirements.txt
 3. add .env: touch .env
-4. Run the application: python app/application.py
+4. Download nltk dependency 
+```
+import nltk
+nltk.download('punkt')
+nltk.download('punkt_tab')
+
+```
+5. Run the application: python app/application.py
 
 
 ## Environment Variables

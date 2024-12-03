@@ -6,3 +6,4 @@ Handles Services of the Project
 from .user_service import *
 from .health_check_service import *
 from .pinecone_service import *
+from .train_agent_service import *

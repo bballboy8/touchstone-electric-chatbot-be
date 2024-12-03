@@ -24,5 +24,6 @@ PINECONEDB_API_KEY = os.getenv("PINECONEDB_API_KEY")
 
 
 # Index 
-PINECONE_INDEX = 'openai-embedding-index'
+# PINECONE_INDEX = 'openai-embedding-index'
+PINECONE_INDEX = "ai-agent-index"
 EMBEDDING_MODEL = "text-embedding-3-small"
