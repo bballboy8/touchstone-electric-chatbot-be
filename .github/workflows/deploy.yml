@@ -23,6 +23,12 @@ jobs:
       - name: Authenticate Docker
         run: gcloud auth configure-docker us-central1-docker.pkg.dev
 
+      - name: Debug Authentication
+        run: gcloud auth list
+
+      - name: Test Docker Authentication
+        run: docker login -u oauth2accesstoken -p "$(gcloud auth print-access-token)" https://us-central1-docker.pkg.dev
+
       - name: Build and Push Docker Image
         run: |
           IMAGE="us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/fastapi-app:$GITHUB_SHA"
