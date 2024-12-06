@@ -7,6 +7,7 @@ from fastapi import UploadFile, File
 import re
 import json
 
+
 async def extract_useful_pages(pdf_path, min_words=50, skip_keywords=None):
     try:
         if skip_keywords is None:
@@ -61,7 +62,6 @@ async def chunk_text(text, max_tokens=900):
 
 
 async def store_embeddings_in_pinecone(chunks):
-
     try:
         pinecone_client = PineConeDBService()
         openai_client = OpenAIService()
@@ -121,7 +121,7 @@ async def upload_pdf_for_training_agent(file: UploadFile = File(...)):
             return num_chunks
 
         return {
-            "message": f"PDF processed successfully. {num_chunks['response']} chunks stored in Pinecone. {num_chunks["message"]}",
+            "message": f"PDF processed successfully. {num_chunks['response']} chunks stored in Pinecone. {num_chunks['message']}",
             "status_code": 200,
         }
     except Exception as e:
@@ -149,7 +149,7 @@ async def query_via_ai_agent(query: str):
             return response
         return {
             "message": "Agent query processes successfully",
-            "response": json.loads(response['response']),
+            "response": json.loads(response["response"]),
             "status_code": 200,
         }
     except Exception as e:
