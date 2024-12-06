@@ -23,6 +23,11 @@ jobs:
       - name: Authenticate Docker
         run: gcloud auth configure-docker us-central1-docker.pkg.dev
 
+      - name: Debug Active Account
+        run: |
+          gcloud auth list
+          gcloud config list
+
       - name: Debug Authentication
         run: gcloud auth list
 
