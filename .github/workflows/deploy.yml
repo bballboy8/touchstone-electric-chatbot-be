@@ -26,25 +26,23 @@ jobs:
       - name: Authenticate Docker
         run: gcloud auth configure-docker us-central1-docker.pkg.dev
 
-      - name: Debug Active Account
-        run: |
-          gcloud auth list
-          gcloud config list
-
-      - name: Test Docker Authentication
-        run: docker login -u oauth2accesstoken -p "$(gcloud auth print-access-token)" https://us-central1-docker.pkg.dev
-
       - name: Build and Push Docker Image
         run: |
           IMAGE="us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/fastapi-app:$GITHUB_SHA"
+          echo "Docker image to be built and pushed: $IMAGE"
           docker build \
             --build-arg OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
             --build-arg PINECONEDB_API_KEY=${{ secrets.PINECONEDB_API_KEY }} \
             -t $IMAGE .
           docker push $IMAGE
 
+      - name: Debug Docker Image Variable
+        run: echo "Deploying Docker image: $IMAGE"
+
       - name: Deploy to Cloud Run
         run: |
+          IMAGE="us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/fastapi-app:$GITHUB_SHA"
+          echo "Deploying image to Cloud Run: $IMAGE"
           gcloud run deploy fastapi-service \
             --image $IMAGE \
             --platform managed \
