@@ -1,5 +1,8 @@
 import os
 from fastapi.security import OAuth2PasswordBearer
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 ALGORITHM = "HS256"
@@ -23,7 +26,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 PINECONEDB_API_KEY = os.getenv("PINECONEDB_API_KEY")
 
 
-# Index 
+# Index
 # PINECONE_INDEX = 'openai-embedding-index'
 PINECONE_INDEX = "ai-agent-index"
 EMBEDDING_MODEL = "text-embedding-3-small"
