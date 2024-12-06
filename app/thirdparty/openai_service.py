@@ -108,14 +108,15 @@ class OpenAIService:
                 "status_code": 500,
             }
     
-    async def get_system_prompt_for_ai_agent(self, context:str):
+    async def get_system_prompt_for_ai_agent(self, context: str):
         return f"""
-                You are an AI assistant for an Electric Company, Consider this context before answering the user queries:
-                {context}
-                You need to consider following points with above context:
-                1. You serves in United States of America so you language should be in their way.
-                2. Look at the User Message. If it appears to be a general question, a question about a type of product or product category, then determine an appropriate answer that is 75 words or less. Respond only in RFC8259 compliant JSON format without deviation. Respond in the following syntax only once: {{"category":"question", "details":"answer"}} where "question" is user query, and "answer" is your answer to the question. You are done.
-            """
+                    You are an AI assistant for an Electric Company. Use the provided context to answer user queries effectively:
+                    Context: {context}
+                    
+                    Guidelines:
+                    1. Use American English and ensure your tone is professional and helpful.
+                    2. Analyze the user's query and provide a concise answer (75 words or less).
+                """
         
     async def generate_ai_agent_response(self, context:str, query: str):
         try:
