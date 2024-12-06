@@ -26,7 +26,10 @@ jobs:
       - name: Build and Push Docker Image
         run: |
           IMAGE="us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/fastapi-app:$GITHUB_SHA"
-          docker build -t $IMAGE .
+          docker build \
+            --build-arg MY_API_KEY=${{ secrets.MY_API_KEY }} \
+            --build-arg MY_OTHER_KEY=${{ secrets.MY_OTHER_KEY }} \
+            -t $IMAGE .
           docker push $IMAGE
 
       - name: Deploy to Cloud Run

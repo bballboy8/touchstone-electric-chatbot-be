@@ -9,6 +9,14 @@ COPY . /app
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Build arguments for environment variables
+ARG OPENAI_API_KEY
+ARG PINECONEDB_API_KEY
+
+# Pass the arguments to environment variables
+ENV OPENAI_API_KEY=$OPENAI_API_KEY
+ENV PINECONEDB_API_KEY=$PINECONEDB_API_KEY
+
 # Add the current working directory to PYTHONPATH
 ENV PYTHONPATH=/app/app
 
