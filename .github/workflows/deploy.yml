@@ -37,12 +37,6 @@ jobs:
             -t $IMAGE .
           docker push $IMAGE
 
-      - name: Debug Docker Image Variable
-        env:
-          IMAGE: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/fastapi-app:${{ github.sha }}
-        run: |
-          echo "Deploying Docker image: $IMAGE"
-
       - name: Deploy to Cloud Run
         env:
           IMAGE: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/fastapi-app:${{ github.sha }}
