@@ -27,8 +27,9 @@ jobs:
         run: gcloud auth configure-docker us-central1-docker.pkg.dev
 
       - name: Build and Push Docker Image
+        env:
+          IMAGE: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/fastapi-app:$GITHUB_SHA
         run: |
-          IMAGE="us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/fastapi-app:$GITHUB_SHA"
           echo "Docker image to be built and pushed: $IMAGE"
           docker build \
             --build-arg OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
@@ -37,11 +38,14 @@ jobs:
           docker push $IMAGE
 
       - name: Debug Docker Image Variable
+        env:
+          IMAGE: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/fastapi-app:$GITHUB_SHA
         run: echo "Deploying Docker image: $IMAGE"
 
       - name: Deploy to Cloud Run
+        env:
+          IMAGE: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/fastapi-app:$GITHUB_SHA
         run: |
-          IMAGE="us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/fastapi-app:$GITHUB_SHA"
           echo "Deploying image to Cloud Run: $IMAGE"
           gcloud run deploy fastapi-service \
             --image $IMAGE \
