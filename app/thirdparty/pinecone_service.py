@@ -111,7 +111,7 @@ class PineConeDBService:
             )
             return {"status_code": 500, "response": str(e)}
 
-    async def query_data(self, query_text, top_k=3):
+    async def query_data(self, query_text, top_k=3, index_name=None):
         """
         Query the specified Pinecone index using a text query.
         Args:
@@ -121,7 +121,10 @@ class PineConeDBService:
             dict: Response with status code and query results.
         """
         try:
-            index = self.pinecone_client.Index(constants.PINECONE_INDEX)
+            if index_name:
+                index = self.pinecone_client.Index(index_name)
+            else:
+                index = self.pinecone_client.Index(constants.PINECONE_INDEX)
             query_embedding = await self._generate_embedding(query_text)
             if query_embedding["status_code"] != 200:
                 return query_embedding
@@ -158,9 +161,12 @@ class PineConeDBService:
             logger.error(f"Failed to generate embedding: {e}")
             return {"status_code": 500, "response": str(e)}
 
-    async def populate_cooked_records(self, cooked_record):
+    async def populate_cooked_records(self, cooked_record, index_name):
         try:
-            index = self.pinecone_client.Index(constants.PINECONE_INDEX)
+            if index_name:
+                index = self.pinecone_client.Index(index_name)
+            else:
+                index = self.pinecone_client.Index(constants.PINECONE_INDEX)
             index.upsert(cooked_record)
             return {
                 "status_code": 200,
@@ -168,4 +174,47 @@ class PineConeDBService:
             }
         except Exception as e:
             logger.error(f"Failed to Populate Cooked Record: {e}")
+            return {"status_code": 500, "response": str(e)}
+        
+    async def create_new_index(self, index_name):
+        try:
+            logger.debug(f"Inside Create Knowledge Book Service:{index_name}")
+            self.pinecone_client.create_index(
+                index_name,
+                dimension=1536,
+                metric="cosine",
+                spec=ServerlessSpec(cloud="aws", region="us-east-1"),
+            )
+            return {
+                "status_code": 200,
+                "response": f"Index '{index_name}' created.",
+            }
+        except Exception as e:
+            logger.error(f"Failed to create index {index_name}: {e}")
+            return {"status_code": 500, "response": str(e)}
+
+    async def get_existing_indexes(self):
+        try:
+            existing_index = [
+                index["name"] for index in self.pinecone_client.list_indexes()
+            ]
+            # Remove the constant.PINECONE_INDEX from the list
+            existing_index.remove(constants.PINECONE_INDEX)
+            return {
+                "status_code": 200,
+                "response": existing_index,
+            }
+        except Exception as e:
+            logger.error(f"Failed to get existing indexes: {e}")
+            return {"status_code": 500, "response": str(e)}
+        
+    async def delete_index(self, index_name):
+        try:
+            self.pinecone_client.delete_index(index_name)
+            return {
+                "status_code": 200,
+                "response": f"Index '{index_name}' deleted.",
+            }
+        except Exception as e:
+            logger.error(f"Failed to delete index {index_name}: {e}")
             return {"status_code": 500, "response": str(e)}

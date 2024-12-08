@@ -6,7 +6,8 @@ from routers import (
     user_router,
     health_check_router,
     pinecone_router,
-    train_agent_router
+    train_agent_router,
+    client_agent_training_controller
 )
 import services
 
@@ -45,6 +46,7 @@ project.include_router(user_router.router, prefix="/api", tags=["User"])
 project.include_router(health_check_router.router, prefix="/api", tags=["Health Check"])
 project.include_router(pinecone_router.router, prefix="/api", tags=["Pinecone"])
 project.include_router(train_agent_router.router, prefix="/api", tags=["Train Agent"])
+project.include_router(client_agent_training_controller.router, prefix="/api", tags=["Client Agent Training"])
 
 
 

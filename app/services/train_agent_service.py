@@ -3,32 +3,25 @@ from nltk.tokenize import sent_tokenize
 import os
 from logging_module import logger
 from services import PineConeDBService, OpenAIService
+from services.client_agent_training_service import get_current_knowledge_books_service
 from fastapi import UploadFile, File
 import re
 import json
+import uuid
 
 
-async def extract_useful_pages(pdf_path, min_words=50, skip_keywords=None):
+async def extract_useful_pages(pdf_path, min_words=20, skip_keywords=None):
     try:
-        if skip_keywords is None:
-            skip_keywords = ["Index", "Table of Contents", "Training Manual"]
-
         useful_pages = []
         with pdfplumber.open(pdf_path) as pdf:
             for i, page in enumerate(pdf.pages):
-                text = page.extract_text()
+                text = page.extract_text_simple()
                 if not text:
                     continue
-
-                word_count = len(text.split())
+                word_count = len(text.split(" "))
                 if word_count < min_words:
                     continue  # Skip short pages
 
-                # Check for skip keywords
-                if any(keyword in text for keyword in skip_keywords):
-                    continue
-
-                # Add page to useful pages
                 useful_pages.append({"page_number": i + 1, "text": text})
         return {"status_code": 200, "response": useful_pages}
     except Exception as e:
@@ -61,7 +54,7 @@ async def chunk_text(text, max_tokens=900):
         return {"status_code": 500, "response": f"Error while chunking text: {e}"}
 
 
-async def store_embeddings_in_pinecone(chunks):
+async def store_embeddings_in_pinecone(chunks, knowledge_book_name=None):
     try:
         pinecone_client = PineConeDBService()
         openai_client = OpenAIService()
@@ -72,9 +65,10 @@ async def store_embeddings_in_pinecone(chunks):
             )
             embedding = openai_response["embedding"]
             metadata = {"page_number": chunk["page_number"], "text": chunk["text"]}
-            cooked_chunks.append((f"chunk-{i}", embedding, metadata))
-        pinecone_response = await pinecone_client.populate_cooked_records(cooked_chunks)
-        print(pinecone_response, "pinecone response")
+            unique_id = str(uuid.uuid4())
+            cooked_chunks.append((f"chunk-{i}-{unique_id}", embedding, metadata))
+        pinecone_response = await pinecone_client.populate_cooked_records(cooked_chunks, knowledge_book_name)
+
         return {
             "status_code": 200,
             "response": len(cooked_chunks),
@@ -85,15 +79,26 @@ async def store_embeddings_in_pinecone(chunks):
 
 
 def clean_newlines(text):
-    text = re.sub(r"(?<!\n)\n(?!\n)", " ", text)
-    text = re.sub(r"\n+", "\n", text)
     return text
 
 
-async def upload_pdf_for_training_agent(file: UploadFile = File(...)):
+async def upload_pdf_for_training_agent(file: UploadFile = File(...), knowledge_book_name: str = None):    
     # Save uploaded file temporarily
     temp_file_path = f"temp_{file.filename}"
     try:
+        
+        if knowledge_book_name:
+            response = await get_current_knowledge_books_service()
+            if response["status_code"] != 200:
+                return response
+            
+            if knowledge_book_name not in response["response"]:
+                return {
+                    "status_code": 400,
+                    "response": f"Knowledge Book '{knowledge_book_name}' does not exist.",
+                }
+
+
         with open(temp_file_path, "wb") as f:
             f.write(await file.read())
 
@@ -114,7 +119,7 @@ async def upload_pdf_for_training_agent(file: UploadFile = File(...)):
                 all_chunks.append(
                     {"page_number": page["page_number"], "text": text_chunk}
                 )
-        num_chunks = await store_embeddings_in_pinecone(all_chunks)
+        num_chunks = await store_embeddings_in_pinecone(all_chunks, knowledge_book_name)
         os.remove(temp_file_path)
 
         if num_chunks["status_code"] != 200:
@@ -130,12 +135,24 @@ async def upload_pdf_for_training_agent(file: UploadFile = File(...)):
         return {"status_code": 500, "message": f"Error while training agent: {e}"}
 
 
-async def query_via_ai_agent(query: str):
+async def query_via_ai_agent(query: str, knowledge_book_name: str = None):
     try:
         pinecone_client = PineConeDBService()
         openai_client = OpenAIService()
 
-        response = await pinecone_client.query_data(query)
+        if knowledge_book_name:
+            response = await get_current_knowledge_books_service()
+            if response["status_code"] != 200:
+                return response
+            
+            if knowledge_book_name not in response["response"]:
+                return {
+                    "status_code": 400,
+                    "response": f"Knowledge Book '{knowledge_book_name}' does not exist.",
+                }
+            
+
+        response = await pinecone_client.query_data(query, 3, knowledge_book_name)
         if response["status_code"] != 200:
             return response
 
