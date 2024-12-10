@@ -130,6 +130,7 @@ async def upload_pdf_for_training_agent(file: UploadFile = File(...), knowledge_
         return {
             "message": f"PDF processed successfully. {num_chunks['response']} chunks stored in Pinecone. {num_chunks['message']}",
             "useful_pages": useful_pages["response"],
+            "all_chunks": all_chunks,
             "status_code": 200,
         }
     except Exception as e:
