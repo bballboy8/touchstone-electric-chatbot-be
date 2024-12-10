@@ -49,7 +49,7 @@ async def chunk_text(text, max_tokens=900):
 
         # if current_chunk:
         #     chunks.append(" ".join(current_chunk))
-        return {"status_code": 200, "response": text}
+        return {"status_code": 200, "response": [text]}
     except Exception as e:
         return {"status_code": 500, "response": f"Error while chunking text: {e}"}
 
