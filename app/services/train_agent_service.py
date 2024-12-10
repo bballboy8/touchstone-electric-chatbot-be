@@ -73,8 +73,6 @@ async def store_embeddings_in_pinecone(chunks, knowledge_book_name=None):
 
         return {
             "status_code": 200,
-            "cooked_chunks": cooked_chunks,
-            "temp_debug_list": temp_debug_list,
             "response": len(cooked_chunks),
             "message": pinecone_response["response"],
         }
@@ -131,8 +129,7 @@ async def upload_pdf_for_training_agent(file: UploadFile = File(...), knowledge_
 
         return {
             "message": f"PDF processed successfully. {num_chunks['response']} chunks stored in Pinecone. {num_chunks['message']}",
-            "cooked_chunks": num_chunks["cooked_chunks"],
-            "num_chunks": num_chunks,
+            "useful_pages": useful_pages["response"],
             "status_code": 200,
         }
     except Exception as e:
