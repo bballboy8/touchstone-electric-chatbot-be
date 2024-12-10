@@ -8,3 +8,4 @@ from .health_check_service import *
 from .pinecone_service import *
 from .train_agent_service import *
 from .client_agent_training_service import *
+from .service_titan_service import *
