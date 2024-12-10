@@ -8,6 +8,8 @@ COPY . /app
 
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
+RUN python -c "import nltk; nltk.download('punkt'); nltk.download('punkt_tab')"
+
 
 # Build arguments for environment variables
 ARG OPENAI_API_KEY
