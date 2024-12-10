@@ -59,10 +59,12 @@ async def store_embeddings_in_pinecone(chunks, knowledge_book_name=None):
         pinecone_client = PineConeDBService()
         openai_client = OpenAIService()
         cooked_chunks = []
+        temp_debug_list = []
         for i, chunk in enumerate(chunks):
             openai_response = await openai_client.generate_text_embeddings(
                 chunk["text"]
             )
+            temp_debug_list.append(openai_response)
             embedding = openai_response["embedding"]
             metadata = {"page_number": chunk["page_number"], "text": chunk["text"]}
             unique_id = str(uuid.uuid4())
@@ -72,6 +74,7 @@ async def store_embeddings_in_pinecone(chunks, knowledge_book_name=None):
         return {
             "status_code": 200,
             "cooked_chunks": cooked_chunks,
+            "temp_debug_list": temp_debug_list,
             "response": len(cooked_chunks),
             "message": pinecone_response["response"],
         }
@@ -129,6 +132,7 @@ async def upload_pdf_for_training_agent(file: UploadFile = File(...), knowledge_
         return {
             "message": f"PDF processed successfully. {num_chunks['response']} chunks stored in Pinecone. {num_chunks['message']}",
             "cooked_chunks": num_chunks["cooked_chunks"],
+            "num_chunks": num_chunks,
             "status_code": 200,
         }
     except Exception as e:
