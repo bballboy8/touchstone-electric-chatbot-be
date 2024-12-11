@@ -61,3 +61,22 @@ class ServiceTitanApiService:
             return {"status_code": 200, "data": response.json()}
         except Exception as e:
             return {"status_code": 500, "data": f"Internal server error: {e}"}
+        
+    async def health_check(self):
+        try:
+            response = await self._get_access_token()
+            response["client_id"] = self.client_id
+            response["api_url"] = self.api_url
+            response["auth_url"] = self.auth_url
+            if response["status_code"] != 200:
+                return response
+            return {
+                "response": response,
+                "message": "Service Titan API service is working correctly.",
+                "status_code": 200,
+            }
+        except Exception as e:
+            return {
+                "message": f"An error occurred while testing the Service Titan API service: {e}",
+                "status_code": 500,
+            }

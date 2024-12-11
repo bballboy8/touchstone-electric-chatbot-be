@@ -32,3 +32,12 @@ async def pinecone_health_check():
     logger.debug("Response from pinecone health check controller")
     return response
 
+@router.get(
+    "/service-titan-api",
+)
+async def service_titan_api_health_check():
+    logger.debug("Inside Service Titan API health check controller")
+    response = await services.test_service_titan_api_service()
+    logger.debug("Response from Service Titan API health check controller")
+    return response
+

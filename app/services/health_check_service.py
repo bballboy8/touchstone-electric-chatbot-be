@@ -1,6 +1,7 @@
 from logging_module import logger
 from thirdparty.openai_service import OpenAIService
 from thirdparty.pinecone_service import PineConeDBService
+from thirdparty.service_titan_api_service import ServiceTitanApiService
 
 
 async def test_openai_chat_completion_service():
@@ -72,5 +73,29 @@ async def test_pinconedb_service():
         logger.error(f"An error occurred while testing the PineconeDB service: {e}")
         return {
             "message": f"An error occurred while testing the PineconeDB service: {e}",
+            "status_code": 500,
+        }
+
+async def test_service_titan_api_service():
+    """
+    Test the Service Titan API service by checking the list of employees.
+
+    Returns:
+    """
+    try:
+        service_titan_api_service = ServiceTitanApiService()
+        response = await service_titan_api_service.health_check()
+        if response["status_code"] != 200:
+            return response
+        return {
+
+            "message": "Service Titan API service is working correctly.",
+            "response": response,
+            "status_code": 200,
+        }
+    except Exception as e:
+        logger.error(f"An error occurred while testing the Service Titan API service: {e}")
+        return {
+            "message": f"An error occurred while testing the Service Titan API service: {e}",
             "status_code": 500,
         }
