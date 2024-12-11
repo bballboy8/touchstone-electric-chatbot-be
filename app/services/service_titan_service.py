@@ -1,7 +1,6 @@
 from thirdparty.service_titan_api_service import ServiceTitanApiService
 from logging_module import logger
-from utils.dependencies import get_current_user_id
-from fastapi import Depends
+
 
 
 async def get_service_titan_employees(
