@@ -1,6 +1,7 @@
 
 from services import PineConeDBService, OpenAIService
 from logging_module import logger
+from fastapi import File
 
 
 
@@ -63,3 +64,25 @@ async def delete_knowledge_book_service(knowledge_book_name: str):
         return response
     except Exception as e:
         logger.debug(f"Error in Delete Knowledge Book Service: {e}")
+
+
+async def update_agent_prompt_service(system_prompt: str):
+    try:
+        logger.debug("Inside Update Agent Prompt Service")
+        openai = OpenAIService()
+        response = await openai.update_system_prompt(system_prompt)
+        logger.info("Agent Prompt Updated")
+        return response
+    except Exception as e:
+        logger.debug(f"Error in Update Agent Prompt Service: {e}")
+
+
+async def get_system_prompt_for_ai_agent_service(context: str):
+    try:
+        logger.debug("Inside Get System Prompt Service")
+        openai = OpenAIService()
+        response = await openai.get_system_prompt_for_ai_agent(context)
+        logger.info("System Prompt fetched")
+        return response
+    except Exception as e:
+        logger.debug(f"Error in Get System Prompt Service: {e}")
