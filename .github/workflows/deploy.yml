@@ -34,6 +34,12 @@ jobs:
           docker build \
             --build-arg OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
             --build-arg PINECONEDB_API_KEY=${{ secrets.PINECONEDB_API_KEY }} \
+            --build-arg SERVICE_TITAN_TENANT_ID=${{ secrets.SERVICE_TITAN_TENANT_ID }} \
+            --build-arg SERVICE_TITAN_CLIENT_ID=${{ secrets.SERVICE_TITAN_CLIENT_ID }} \
+            --build-arg SERVICE_TITAN_CLIENT_SECRET=${{ secrets.SERVICE_TITAN_CLIENT_SECRET }} \
+            --build-arg SERVICE_TITAN_BASE_AUTH_URL=${{ secrets.SERVICE_TITAN_BASE_AUTH_URL }} \
+            --build-arg SERVICE_TITAN_BASE_API_URL=${{ secrets.SERVICE_TITAN_BASE_API_URL }} \
+            --build-arg SERVICE_TITAN_APP_KEY=${{ secrets.SERVICE_TITAN_APP_KEY }} \
             -t $IMAGE .
           docker push $IMAGE
 
@@ -47,3 +53,4 @@ jobs:
             --platform managed \
             --region us-central1 \
             --allow-unauthenticated
+
