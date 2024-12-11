@@ -94,7 +94,7 @@ class OpenAIService:
                 "message": f"An error occurred while testing the OpenAI API: {e}",
                 "status_code": 500,
             }
-    
+
     async def generate_text_embeddings(self, text):
         try:
             embedding_model = constants.EMBEDDING_MODEL
@@ -109,30 +109,32 @@ class OpenAIService:
                 "message": f"An error occurred while Generating the embeddings via OpenAI API: {e}",
                 "status_code": 500,
             }
-    
+
     async def get_system_prompt_for_ai_agent(self, context: str):
         try:
             if not os.path.exists("prompt.txt"):
                 return {"status_code": 404, "message": "System prompt file not found."}
-            with open("prompt.txt", 'r') as file:
+            with open("prompt.txt", "r") as file:
                 prompt_template = file.read()
-                print(prompt_template)
-                prompt_template = prompt_template.replace("{context}", context)
+                prompt_template += f"""
+                    Use the provided context to answer user queries effectively:
+                    Context: {context}
+                """
             return {"status_code": 200, "system_prompt": prompt_template}
         except Exception as e:
             return {
                 "message": f"An error occurred while getting system prompt for AI agent: {e}",
                 "status_code": 500,
             }
-    
-        
+
     async def generate_ai_agent_response(self, context:str, query: str):
         try:
             system_prompt = await self.get_system_prompt_for_ai_agent(context)
             if system_prompt.get("status_code") != 200:
                 return system_prompt
-            
+
             system_prompt = system_prompt.get("system_prompt")
+
             response = await self.get_gpt_response(
                 prompt=query, system_prompt=system_prompt
             )
@@ -142,22 +144,19 @@ class OpenAIService:
                 "message": f"An error occurred while Generating AI agent response via OpenAI API: {e}",
                 "status_code": 500,
             }
-        
+
     async def update_system_prompt(self, system_prompt: str):
         try:
 
             if not os.path.exists("prompt.txt"):
                 return {"status_code": 404, "message": "System prompt file not found."}
-            
+
             with open("prompt.txt", 'w') as file:
                 file.write(system_prompt)
-            
+
             return {"status_code": 200, "message": "System prompt updated successfully."}
         except Exception as e:
             return {
                 "message": f"An error occurred while updating system prompt: {e}",
                 "status_code": 500,
             }
-        
-
-
