@@ -1,7 +1,6 @@
 from fastapi import APIRouter, UploadFile, File
 import services
 from logging_module import logger
-from typing import Optional
 from fastapi import Form
 
 
@@ -86,8 +85,8 @@ async def update_agent_system_prompt(system_prompt: str = Form(...)):
 @router.get(
     "/get-system-prompt",
 )
-async def get_system_prompt(context: Optional[str] = "Test Context"):
+async def get_system_prompt():
     logger.debug("Inside Get System Prompt controller")
-    response = await services.get_system_prompt_for_ai_agent_service(context)
+    response = await services.get_system_prompt_for_ai_agent_service("{context}")
     logger.debug("Response from Get System Prompt controller")
     return response
