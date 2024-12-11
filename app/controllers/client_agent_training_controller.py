@@ -1,8 +1,8 @@
 from fastapi import APIRouter, UploadFile, File
 import services
 from logging_module import logger
-# Import Query
-from pydantic import BaseModel, Field
+from typing import Optional
+from fastapi import Form
 
 
 router = APIRouter()
@@ -71,4 +71,23 @@ async def delete_knowledge_book(knowledge_book_name: str):
     logger.debug("Inside Delete Knowledge Book controller")
     response = await services.delete_knowledge_book_service(knowledge_book_name)
     logger.debug("Response from Delete Knowledge Book controller")
+    return response
+
+@router.put(
+    "/update-agent-system-prompt",
+)
+async def update_agent_system_prompt(system_prompt: str = Form(...)):
+    logger.debug("Inside Update Agent System Prompt controller")
+    response = await services.update_agent_prompt_service(system_prompt)
+    logger.debug("Response from Update Agent System Prompt controller")
+    return response
+
+
+@router.get(
+    "/get-system-prompt",
+)
+async def get_system_prompt(context: Optional[str] = "Test Context"):
+    logger.debug("Inside Get System Prompt controller")
+    response = await services.get_system_prompt_for_ai_agent_service(context)
+    logger.debug("Response from Get System Prompt controller")
     return response
