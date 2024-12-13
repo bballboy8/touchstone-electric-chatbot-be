@@ -1,6 +1,8 @@
 from config import constants
 import requests
-
+from models.service_titan import ServiceTitanCustomer, ServiceTitanBookingRequest
+import json
+import uuid
 
 class ServiceTitanApiService:
     def __init__(self):
@@ -10,6 +12,7 @@ class ServiceTitanApiService:
         self.api_url = constants.SERVICE_TITAN_BASE_API_URL
         self.app_key = constants.SERVICE_TITAN_APP_KEY
         self.tenant_id = constants.SERVICE_TITAN_TENANT_ID
+        self.booking_provider_id = constants.SERVICE_TITAN_BOOKING_PROVIDER_ID
 
     async def _get_access_token(self):
         try:
@@ -146,6 +149,127 @@ class ServiceTitanApiService:
                 "ST-App-Key": self.app_key,
             }
             response = requests.get(url, headers=headers)
+            response.raise_for_status()
+            return {"status_code": 200, "data": response.json()}
+        except Exception as e:
+            return {"status_code": 500, "data": f"Internal server error: {e}"}
+
+    async def create_customer(self, customer_data: ServiceTitanCustomer):
+        try:
+            response = await self._get_access_token()
+            if response["status_code"] != 200:
+                return response
+            access_token = response["data"]["access_token"]
+            url = f"{self.api_url}/crm/v2/tenant/{self.tenant_id}/customers"
+            headers = {
+                "Authorization": access_token,
+                "ST-App-Key": self.app_key,
+            }
+            data = customer_data.model_dump()
+            response = requests.post(url, headers=headers, json=data)
+            if response.status_code != 200:
+                return {
+                    "status_code": response.status_code,
+                    "data": json.loads(response.text),
+                }
+            response.raise_for_status()
+            return {"status_code": 200, "data": response.json()}
+        except Exception as e:
+            return {"status_code": 500, "data": f"Internal server error: {e}"}
+
+    async def get_customer_by_id(self, customer_id: int):
+        try:
+            response = await self._get_access_token()
+            if response["status_code"] != 200:
+                return response
+            access_token = response["data"]["access_token"]
+            url = (
+                f"{self.api_url}/crm/v2/tenant/{self.tenant_id}/customers/{customer_id}"
+            )
+            headers = {
+                "Authorization": access_token,
+                "ST-App-Key": self.app_key,
+            }
+            response = requests.get(url, headers=headers)
+            response.raise_for_status()
+            return {"status_code": 200, "data": response.json()}
+        except Exception as e:
+            return {"status_code": 500, "data": f"Internal server error: {e}"}
+
+    async def create_booking(self, booking_data: ServiceTitanBookingRequest):
+        try:
+            """
+                {
+                "source": "online",
+                "name": "Ai Customer 4",
+                "summary": "Patch Work",
+                "isFirstTimeClient": true,
+                "contacts": [{"type": "MobilePhone", "value": "+919993227728"}]
+                }
+            """
+            response = await self._get_access_token()
+            if response["status_code"] != 200:
+                return response
+            access_token = response["data"]["access_token"]
+            url = f"{self.api_url}/crm/v2/tenant/{self.tenant_id}/booking-provider/{self.booking_provider_id}/bookings"
+
+            headers = {
+                "Authorization": access_token,
+                "ST-App-Key": self.app_key,
+            }
+            data = booking_data.model_dump()
+            data["externalId"] = str(uuid.uuid4())
+            response = requests.post(url, headers=headers, json=data)
+            if response.status_code != 200:
+                return {
+                    "status_code": response.status_code,
+                    "data": json.loads(response.text),
+                }
+            response.raise_for_status()
+            return {"status_code": 200, "data": response.json()}
+        except Exception as e:
+            return {"status_code": 500, "data": f"Internal server error: {e}"}
+
+    async def get_customer_contacts_by_name(self, name:str):
+        try:
+            response = await self._get_access_token()
+            if response["status_code"] != 200:
+                return response
+            access_token = response["data"]["access_token"]
+            url = f"{self.api_url}/crm/v2/tenant/{self.tenant_id}/contacts?title={name}"
+            headers = {
+                "Authorization": access_token,
+                "ST-App-Key": self.app_key,
+            }
+            response = requests.get(url, headers=headers)
+            if response.status_code != 200:
+                return {
+                    "status_code": response.status_code,
+                    "data": json.loads(response.text),
+                }
+            response.raise_for_status()
+            return {"status_code": 200, "data": response.json()}
+        except Exception as e:
+            return {"status_code": 500, "data": f"Internal server error: {e}"}
+        
+    async def create_contact(self, name: str):
+        try:
+            response = await self._get_access_token()
+            if response["status_code"] != 200:
+                return response
+            access_token = response["data"]["access_token"]
+            url = f"{self.api_url}/crm/v2/tenant/{self.tenant_id}/contacts"
+            headers = {
+                "Authorization": access_token,
+                "ST-App-Key": self.app_key,
+            }
+            data = {"title": name}
+            response = requests.post(url, headers=headers, json=data)
+            if response.status_code != 200:
+                return {
+                    "status_code": response.status_code,
+                    "data": json.loads(response.text),
+                }
             response.raise_for_status()
             return {"status_code": 200, "data": response.json()}
         except Exception as e:

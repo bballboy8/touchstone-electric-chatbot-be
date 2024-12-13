@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 import services
 from logging_module import logger
 from utils.dependencies import get_current_user_id
+from models.service_titan import ServiceTitanCustomer, ServiceTitanBookingRequest
 
 router = APIRouter()
 
@@ -63,4 +64,31 @@ async def get_service_titan_location_by_id(location_id: int):
     logger.debug("Inside Service Titan location by id controller")
     response = await services.get_service_titan_location_by_id(location_id)
     logger.debug("Response from Service Titan location by id controller")
+    return response
+
+@router.post(
+    "/create-customer",
+)
+async def create_service_titan_customer(customer_data: ServiceTitanCustomer):
+    logger.debug("Inside Service Titan create customer controller")
+    response = await services.create_service_titan_customer(customer_data)
+    logger.debug("Response from Service Titan create customer controller")
+    return response
+
+@router.get(
+    "/get-customer-by-id",
+)
+async def get_service_titan_customer_by_id(customer_id: int):
+    logger.debug("Inside Service Titan customer by id controller")
+    response = await services.get_customer_by_id(customer_id)
+    logger.debug("Response from Service Titan customer by id controller")
+    return response
+
+@router.post(
+    "/create-booking",
+)
+async def create_service_titan_booking(booking_data: ServiceTitanBookingRequest):
+    logger.debug("Inside Service Titan create booking controller")
+    response = await services.create_booking_request(booking_data)
+    logger.debug("Response from Service Titan create booking controller")
     return response

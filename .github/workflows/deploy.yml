@@ -40,6 +40,7 @@ jobs:
             --build-arg SERVICE_TITAN_BASE_AUTH_URL=${{ secrets.SERVICE_TITAN_BASE_AUTH_URL }} \
             --build-arg SERVICE_TITAN_BASE_API_URL=${{ secrets.SERVICE_TITAN_BASE_API_URL }} \
             --build-arg SERVICE_TITAN_APP_KEY=${{ secrets.SERVICE_TITAN_APP_KEY }} \
+            --build-arg SERVICE_TITAN_BOOKING_PROVIDER_ID=${{ secrets.SERVICE_TITAN_BOOKING_PROVIDER_ID }} \
             -t $IMAGE .
           docker push $IMAGE
 

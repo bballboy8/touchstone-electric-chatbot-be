@@ -1,5 +1,6 @@
 from thirdparty.service_titan_api_service import ServiceTitanApiService
 from logging_module import logger
+from models.service_titan import ServiceTitanCustomer, ServiceTitanBookingRequest
 
 
 async def get_service_titan_employees(
@@ -88,3 +89,45 @@ async def get_service_titan_location_by_id(location_id: int):
     except Exception as e:
         logger.error(f"Error getting Service Titan location by id: {e}")
         return {"status_code": 500, "data": f"Internal server error:{e}"}
+    
+async def create_service_titan_customer(customer_data: ServiceTitanCustomer):
+    logger.info("Creating Service Titan customer")
+    try:
+        service_titan_api_service = ServiceTitanApiService()
+        response = await service_titan_api_service.create_customer(customer_data)
+        print(response)
+        if response["status_code"] != 200:
+            return response
+        logger.info("Service Titan customer created")
+        return {"status_code": 200, "data": response["data"]}
+    except Exception as e:
+        logger.error(f"Error creating Service Titan customer: {e}")
+        return {"status_code": 500, "data": f"Internal server error:{e}"}
+    
+async def get_customer_by_id(customer_id: int):
+    logger.info("Getting Service Titan customer by id")
+    try:
+        service_titan_api_service = ServiceTitanApiService()
+        response = await service_titan_api_service.get_customer_by_id(customer_id)
+        logger.info("Service Titan customer by id received")
+        if response["status_code"] != 200:
+            return response
+        return {"status_code": 200, "data": response["data"]}
+    except Exception as e:
+        logger.error(f"Error getting Service Titan customer by id: {e}")
+        return {"status_code": 500, "data": f"Internal server error:{e}"}
+    
+async def create_booking_request(booking_data: ServiceTitanBookingRequest):
+    logger.info("Creating Service Titan booking request")
+    try:
+        service_titan_api_service = ServiceTitanApiService()
+        response = await service_titan_api_service.create_booking(booking_data)
+        if response["status_code"] != 200:
+            return response
+        logger.info("Service Titan booking request created")
+        return {"status_code": 200, "data": response["data"]}
+    except Exception as e:
+        logger.error(f"Error creating Service Titan booking request: {e}")
+        return {"status_code": 500, "data": f"Internal server error:{e}"}
+
+    
