@@ -95,7 +95,6 @@ async def create_service_titan_customer(customer_data: ServiceTitanCustomer):
     try:
         service_titan_api_service = ServiceTitanApiService()
         response = await service_titan_api_service.create_customer(customer_data)
-        print(response)
         if response["status_code"] != 200:
             return response
         logger.info("Service Titan customer created")
