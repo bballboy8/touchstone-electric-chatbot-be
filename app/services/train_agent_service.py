@@ -8,6 +8,8 @@ from fastapi import UploadFile, File
 import re
 import json
 import uuid
+from models import *
+from services.service_titan_service import create_booking_request
 
 
 async def extract_useful_pages(pdf_path, min_words=20, skip_keywords=None):
@@ -138,12 +140,69 @@ async def upload_pdf_for_training_agent(file: UploadFile = File(...), knowledge_
             os.remove(temp_file_path)
         return {"status_code": 500, "message": f"Error while training agent: {e}"}
 
+def detect_booking_intent(user_query: str) -> bool:
+    keywords = ["BOOK", "APPOINTMENT", "SCHEDULE", "RESERVE"]
+    return any(keyword in user_query for keyword in keywords)
+
+async def extract_booking_data(user_query: str):
+    try:
+        openai_service = OpenAIService()
+        response = await openai_service.extract_user_details(user_query)
+        if response["status_code"] != 200:
+            return response
+
+        details = response["response"]
+        logger.debug(f"Extracted user details: {details}")
+        json_data = json.loads(details)
+        logger.debug(f"Extracted user details in json format: {json_data}")
+        contacts = []
+        if "email" in json_data and json_data["email"]:
+            contacts.append(ServiceTitanCustomerContact(type="Email", value=json_data["email"]))
+        if "phone" in json_data and json_data["phone"]:
+            contacts.append(ServiceTitanCustomerContact(type="MobilePhone", value=json_data["phone"]))
+
+        return {
+            "data": ServiceTitanBookingRequest(
+            source="AI Assistant",
+            name=json_data.get("name", "Unknown User"),
+            summary=user_query,
+            isFirstTimeClient=True,
+            contacts=contacts
+        ),
+            "status_code": 200,
+        }
+    except Exception as e:
+        logger.error(f"Error extracting booking data: {e}")
+        return {"message": "An error occurred while extracting booking data.", "error": str(e), "status_code": 500}
+
+async def handle_booking_request(user_query: str):
+    try:
+        booking_data = await extract_booking_data(user_query)
+        if booking_data["status_code"] != 200:
+            return booking_data
+
+        booking_data = booking_data["data"]
+        response = await create_booking_request(booking_data)
+        if response["status_code"] != 200:
+            return response
+        
+        return {"message": "Booking request created successfully", "status_code": 200, "response": response["data"]}
+    except Exception as e:
+        return {"message": "An error occurred while processing your booking.", "error": str(e)}
+
+
 
 async def query_via_ai_agent(query: str, knowledge_book_name: str = None):
     try:
         pinecone_client = PineConeDBService()
         openai_client = OpenAIService()
 
+        if detect_booking_intent(query):
+            response =  await handle_booking_request(query)
+            if response["status_code"] != 200:
+                return response
+            return {"message": "Booking request created successfully", "status_code": 200, "response": response["response"]}
+   
         if knowledge_book_name:
             response = await get_current_knowledge_books_service()
             if response["status_code"] != 200:

@@ -219,6 +219,7 @@ class ServiceTitanApiService:
             }
             data = booking_data.model_dump()
             data["externalId"] = str(uuid.uuid4())
+            print("final data", data)
             response = requests.post(url, headers=headers, json=data)
             if response.status_code != 200:
                 return {
