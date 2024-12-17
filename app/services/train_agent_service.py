@@ -20,9 +20,6 @@ async def extract_useful_pages(pdf_path, min_words=20, skip_keywords=None):
                 text = page.extract_text_simple()
                 if not text:
                     continue
-                word_count = len(text.split(" "))
-                if word_count < min_words:
-                    continue  # Skip short pages
 
                 useful_pages.append({"page_number": i + 1, "text": text})
         return {"status_code": 200, "response": useful_pages}
