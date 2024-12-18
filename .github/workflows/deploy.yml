@@ -41,6 +41,8 @@ jobs:
             --build-arg SERVICE_TITAN_BASE_API_URL=${{ secrets.SERVICE_TITAN_BASE_API_URL }} \
             --build-arg SERVICE_TITAN_APP_KEY=${{ secrets.SERVICE_TITAN_APP_KEY }} \
             --build-arg SERVICE_TITAN_BOOKING_PROVIDER_ID=${{ secrets.SERVICE_TITAN_BOOKING_PROVIDER_ID }} \
+            --build-arg SLACK_BOT_TOKEN=${{ secrets.SLACK_BOT_TOKEN }} \
+            --build-arg SLACK_SIGNING_SECRET=${{ secrets.SLACK_SIGNING_SECRET }} \
             -t $IMAGE .
           docker push $IMAGE
 
