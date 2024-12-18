@@ -3,6 +3,9 @@ import requests
 from models.service_titan import ServiceTitanCustomer, ServiceTitanBookingRequest
 import json
 import uuid
+import httpx
+from tenacity import retry, wait_fixed, stop_after_attempt
+from logging_module import logger
 
 class ServiceTitanApiService:
     def __init__(self):
@@ -195,6 +198,16 @@ class ServiceTitanApiService:
             return {"status_code": 200, "data": response.json()}
         except Exception as e:
             return {"status_code": 500, "data": f"Internal server error: {e}"}
+        
+    @retry(wait=wait_fixed(2), stop=stop_after_attempt(3))
+    async def send_request_async(url, headers, data):
+        async with httpx.AsyncClient() as client:
+            try:
+                response = await client.post(url, headers=headers, json=data)
+                response.raise_for_status() 
+                return response
+            except httpx.RequestError as e:
+                logger.error(f"Request failed: {e}")
 
     async def create_booking(self, booking_data: ServiceTitanBookingRequest):
         try:
@@ -219,8 +232,8 @@ class ServiceTitanApiService:
             }
             data = booking_data.model_dump()
             data["externalId"] = str(uuid.uuid4())
-            print("final data", data)
-            response = requests.post(url, headers=headers, json=data)
+
+            response = await self.send_request_async(url, headers, data)
             if response.status_code != 200:
                 return {
                     "status_code": response.status_code,

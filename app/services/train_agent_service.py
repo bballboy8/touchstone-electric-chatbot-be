@@ -8,8 +8,9 @@ from fastapi import UploadFile, File
 import re
 import json
 import uuid
-from models import *
+from models import ServiceTitanBookingRequest, ServiceTitanCustomerContact
 from services.service_titan_service import create_booking_request
+from config import constants
 
 
 async def extract_useful_pages(pdf_path, min_words=20, skip_keywords=None):
@@ -138,7 +139,7 @@ async def upload_pdf_for_training_agent(file: UploadFile = File(...), knowledge_
         return {"status_code": 500, "message": f"Error while training agent: {e}"}
 
 def detect_booking_intent(user_query: str) -> bool:
-    keywords = ["BOOK", "APPOINTMENT", "SCHEDULE", "RESERVE"]
+    keywords = constants.BOOKING_INTENT_CONSTANTS
     return any(keyword in user_query for keyword in keywords)
 
 async def extract_booking_data(user_query: str):
@@ -148,7 +149,7 @@ async def extract_booking_data(user_query: str):
         if response["status_code"] != 200:
             return response
 
-        details = response["response"]
+        details = response["response"].replace("```json", "").replace("```", "").strip()
         logger.debug(f"Extracted user details: {details}")
         json_data = json.loads(details)
         logger.debug(f"Extracted user details in json format: {json_data}")
