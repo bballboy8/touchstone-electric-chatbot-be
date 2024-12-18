@@ -113,7 +113,9 @@ class OpenAIService:
     async def get_system_prompt_for_ai_agent(self, context: str):
         try:
             if not os.path.exists("prompt.txt"):
-                return {"status_code": 404, "message": "System prompt file not found."}
+                with open("prompt.txt", "w") as file:
+                    file.write("Be professional and courteous in your responses.")
+
             with open("prompt.txt", "r") as file:
                 prompt_template = file.read()
                 prompt_template += f"""
@@ -147,10 +149,6 @@ class OpenAIService:
 
     async def update_system_prompt(self, system_prompt: str):
         try:
-
-            if not os.path.exists("prompt.txt"):
-                return {"status_code": 404, "message": "System prompt file not found."}
-
             with open("prompt.txt", 'w') as file:
                 file.write(system_prompt)
 
@@ -158,5 +156,30 @@ class OpenAIService:
         except Exception as e:
             return {
                 "message": f"An error occurred while updating system prompt: {e}",
+                "status_code": 500,
+            }
+
+    async def extract_user_details(self, user_query: str):
+        try:
+            system_prompt = """ 
+                            Extract the user's details (name, email, phone number, address) from the given query. 
+                            Return only valid JSON in the following RFC8259-compliant format, and do not include any extra text or explanations outside the JSON object:
+                            {
+                                "name": "John Doe",
+                                "email": "email@email.com",
+                                "phone": "1234567890",
+                                "address": "123, Street Name, City, Country"
+                            }
+                            Ensure:
+                            1. If any field is missing, use an empty string "" for that field.
+                            """
+
+            response = await self.get_gpt_response(
+                prompt=user_query, system_prompt=system_prompt
+            )
+            return response
+        except Exception as e:
+            return {
+                "message": f"An error occurred while extracting user details: {e}",
                 "status_code": 500,
             }

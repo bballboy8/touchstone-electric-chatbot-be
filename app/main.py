@@ -8,7 +8,8 @@ from routers import (
     pinecone_router,
     train_agent_router,
     client_agent_training_controller,
-    service_titan_router
+    service_titan_router,
+    slack_router
 )
 import services
 
@@ -49,6 +50,8 @@ project.include_router(pinecone_router.router, prefix="/api", tags=["Pinecone"])
 project.include_router(train_agent_router.router, prefix="/api", tags=["Train Agent"])
 project.include_router(client_agent_training_controller.router, prefix="/api", tags=["Client Agent Training"])
 project.include_router(service_titan_router.router, prefix="/api", tags=["Service Titan"])
+project.include_router(slack_router.router, prefix="/api", tags=["Slack"])
+
 
 
 
