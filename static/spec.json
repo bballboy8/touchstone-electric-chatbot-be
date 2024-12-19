@@ -13,11 +13,11 @@
           "parameters": [
             {
               "name": "message",
-              "in": "formData",
+              "in": "query",
               "required": true,
               "schema": {
                 "type": "string",
-                "example": "stringHi"
+                "example": "hi"
               }
             }
           ],
