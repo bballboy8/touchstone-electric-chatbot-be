@@ -5,6 +5,8 @@ import hmac
 import hashlib
 import time
 from config import constants
+from cachetools import TTLCache
+
 
 
 async def verify_slack_request(body, headers, signing_secret: str):
@@ -45,3 +47,20 @@ async def slack_events_handler(data, body, headers):
         traceback.print_exc()
         logger.error(f"Error in slack_events_handler: {str(e)}")
         return {"status": "error", "message": str(e)}
+
+slack_request_cache = TTLCache(maxsize=1000, ttl=300)  # Cache size 1000, expires in 5 minutes
+
+def is_duplicate_request(headers):
+    slack_signature = headers.get("X-Slack-Signature")
+    slack_timestamp = headers.get("X-Slack-Request-Timestamp")
+    if not slack_signature or not slack_timestamp:
+        return False
+
+    if abs(time.time() - int(slack_timestamp)) > 60 * 5:
+        raise HTTPException(status_code=401, detail="Request too old")
+
+    if slack_signature in slack_request_cache:
+        return True
+
+    slack_request_cache[slack_signature] = True
+    return False

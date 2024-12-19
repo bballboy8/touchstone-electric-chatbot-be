@@ -12,6 +12,11 @@ async def slack_events_handler(request: Request, background_tasks: BackgroundTas
     logger.debug("Inside Slack events handler controller")
     body = await request.body()
     headers = request.headers
+
+    is_duplicate = slack_service.is_duplicate_request(headers)
+    if is_duplicate:
+        return JSONResponse(content={"status": "ok"}, status_code=200)
+
     if headers.get("Content-Type") == "application/json":
         data = await request.json()
     elif headers.get("Content-Type") == "application/x-www-form-urlencoded":
