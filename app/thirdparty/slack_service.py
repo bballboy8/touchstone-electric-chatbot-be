@@ -34,6 +34,8 @@ class SlackServiceAPI:
                         if len(event_id_list) > 10:
                             event_id_list.pop(0)
                         return {"status": "ok"}
+                    
+                event_type = slack_event["event"]["type"]
 
                 if "challenge" in slack_event:
                     return {"challenge": slack_event["challenge"]}
@@ -58,7 +60,7 @@ class SlackServiceAPI:
                     slack_signature = headers.get("x-slack-signature")
                     event_id = slack_event["event_id"]
                     self.slack_client.chat_postMessage(
-                        channel=channel_id, text=f"<@{user_id}> {bot_response} {timestamp} {slack_signature} source: JSON {event_id} {event_id_list}"
+                        channel=channel_id, text=f"<@{user_id}> {bot_response} {timestamp} {slack_signature} source: JSON {event_id} {event_id_list} {event_type}"
                     )
                 except SlackApiError as e:
                     print(f"Error sending message: {e.response['error']}")
