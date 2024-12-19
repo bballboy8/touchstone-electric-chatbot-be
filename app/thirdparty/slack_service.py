@@ -3,8 +3,10 @@ from config import constants
 from slack_sdk.errors import SlackApiError
 from services.train_agent_service import query_via_ai_agent
 from logging_module import logger
+import time
 
 event_id_list = []
+event_message_list = {}
 class SlackServiceAPI:
     def __init__(self):
         self.slack_client = WebClient(token=constants.SLACK_BOT_TOKEN)
@@ -45,6 +47,15 @@ class SlackServiceAPI:
                     return {"status": "ok"}
 
                 event_id_list.append(event_id)
+
+                # Check if the message is repeated under 10 seconds
+                if event_message_list.get(user_id) == user_message:
+                    if (time.time() - event_message_list.get(user_id + "_time")) <= 10:
+                        if len(event_message_list) > 10:
+                            event_message_list.pop(0)
+                        return {"status": "ok"}
+                event_message_list[user_id] = user_message
+                event_message_list[user_id + "_time"] = time.time()
 
                 bot_response = await query_via_ai_agent(user_message)
 
