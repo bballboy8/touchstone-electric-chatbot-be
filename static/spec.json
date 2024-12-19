@@ -1,0 +1,41 @@
+{
+    "openapi": "3.0.2",
+    "info": {
+      "title": "FastAPI Service",
+      "version": "1.0.0",
+      "description": "This is the OpenAPI specification for the FastAPI service endpoint."
+    },
+    "paths": {
+      "/api/client/process-tawk-query": {
+        "post": {
+          "summary": "Process Tawk query",
+          "operationId": "processTawkQuery",
+          "parameters": [
+            {
+              "name": "message",
+              "in": "formData",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "example": "stringHi"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "response": "your response data",
+                    "status_code": 200
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
