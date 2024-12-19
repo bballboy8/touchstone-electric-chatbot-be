@@ -12,7 +12,7 @@ existing_signatures = []
 @router.post("/events")
 async def slack_events_handler(request: Request, background_tasks: BackgroundTasks):
     headers = request.headers
-    if existing_signatures and headers.get("x-slack-signature") in existing_signatures:
+    if  headers.get("x-slack-signature") in existing_signatures:
         if len(existing_signatures) > 10:
             existing_signatures.pop(0)
         return JSONResponse(content={"status": "ok"}, status_code=200)
