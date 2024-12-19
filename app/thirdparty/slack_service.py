@@ -4,6 +4,7 @@ from slack_sdk.errors import SlackApiError
 from services.train_agent_service import query_via_ai_agent
 from logging_module import logger
 
+event_id_list = []
 class SlackServiceAPI:
     def __init__(self):
         self.slack_client = WebClient(token=constants.SLACK_BOT_TOKEN)
@@ -33,8 +34,14 @@ class SlackServiceAPI:
                 channel_id = slack_event["event"]["channel"]
                 user_id = slack_event["event"]["user"]
                 event_type = slack_event["event"]["type"]
+                event_id = slack_event["event_id"]
 
                 if event_type != "app_mention":
+                    return {"status": "ok"}
+                
+                if event_id in event_id_list:
+                    if len(event_id_list) > 10:
+                        event_id_list.pop(0)
                     return {"status": "ok"}
 
                 bot_response = await query_via_ai_agent(user_message)
@@ -49,7 +56,7 @@ class SlackServiceAPI:
                 # Send response back to Slack
                 try:
                     self.slack_client.chat_postMessage(
-                        channel=channel_id, text=f"<@{user_id}> {bot_response} Event: {event_type}"
+                        channel=channel_id, text=f"<@{user_id}> {bot_response} Event: {event_type} Event ID: {event_id}"
                     )
                 except SlackApiError as e:
                     print(f"Error sending message: {e.response['error']}")
