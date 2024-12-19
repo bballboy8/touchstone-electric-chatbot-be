@@ -17,7 +17,7 @@ class SlackServiceAPI:
         return response
 
     # handle slack events
-    async def handle_event(self, content_type, data):
+    async def handle_event(self, content_type, data, headers=None):
         logger.debug(f"Content-Type: {content_type}")
 
         if content_type == "application/json":
@@ -45,8 +45,10 @@ class SlackServiceAPI:
 
                 # Send response back to Slack
                 try:
+                    timestamp = headers.get("x-slack-request-timestamp")
+                    slack_signature = headers.get("x-slack-signature")
                     self.slack_client.chat_postMessage(
-                        channel=channel_id, text=f"<@{user_id}> {bot_response}"
+                        channel=channel_id, text=f"<@{user_id}> {bot_response} {timestamp} {slack_signature} source: JSON"
                     )
                 except SlackApiError as e:
                     print(f"Error sending message: {e.response['error']}")

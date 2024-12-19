@@ -36,7 +36,7 @@ async def slack_events_handler(data, body, headers):
         )
         slack_instance = SlackServiceAPI()
         response = await slack_instance.handle_event(
-            content_type=content_type, data=data
+            content_type=content_type, data=data, headers=headers
         )
         logger.debug("Response from Slack events handler controller")
         return response
