@@ -1,8 +1,8 @@
-from fastapi import APIRouter, UploadFile, File
+from fastapi import APIRouter, UploadFile, File, Request
 import services
 from logging_module import logger
 from fastapi import Form
-
+from fastapi.responses import JSONResponse
 
 router = APIRouter()
 
@@ -90,3 +90,13 @@ async def get_system_prompt():
     response = await services.get_system_prompt_for_ai_agent_service("{context}")
     logger.debug("Response from Get System Prompt controller")
     return response
+
+
+@router.post(
+    "/process-tawk-query",
+)
+async def process_tawk_query(message: str = Form(...)):
+    logger.debug("Inside Process Tawk Query controller")
+    response = await services.process_tawk_query_service(message)
+    logger.debug("Response from Process Tawk Query controller")
+    return JSONResponse(content=response, status_code=200)

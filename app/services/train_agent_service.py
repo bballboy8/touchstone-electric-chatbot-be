@@ -233,3 +233,48 @@ async def query_via_ai_agent(query: str, knowledge_book_name: str = None):
         }
     except Exception as e:
         return {"status_code": 500, "response": f"Error while querying the agent: {e}"}
+
+
+
+
+async def process_tawk_query_service(query: str, knowledge_book_name: str = None):
+    try:
+        pinecone_client = PineConeDBService()
+        openai_client = OpenAIService()
+
+        if detect_booking_intent(query):
+            response =  await handle_booking_request(query)
+            if response["status_code"] != 200:
+                return response
+            return {"message": "Booking request created successfully", "status_code": 200, "response": response["response"]}
+   
+        if knowledge_book_name:
+            response = await get_current_knowledge_books_service()
+            if response["status_code"] != 200:
+                return response
+            
+            if knowledge_book_name not in response["response"]:
+                return {
+                    "status_code": 400,
+                    "response": f"Knowledge Book '{knowledge_book_name}' does not exist.",
+                }
+            
+
+        response = await pinecone_client.query_data(query, 3, knowledge_book_name)
+        if response["status_code"] != 200:
+            return response
+
+        matches = response["response"]["matches"]
+
+        context = " ".join([match["metadata"]["text"] for match in matches])
+        response = await openai_client.generate_ai_agent_response(
+            context=context, query=query
+        )
+        if response["status_code"] != 200:
+            return response
+        return {
+            "response": response["response"],
+            "status_code": 200,
+        }
+    except Exception as e:
+        return {"status_code": 500, "response": f"Error while querying the agent: {e}"}
