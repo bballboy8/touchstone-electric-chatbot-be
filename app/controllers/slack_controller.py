@@ -31,9 +31,11 @@ async def slack_events_handler(request: Request, background_tasks: BackgroundTas
         logger.error("Invalid content type")
         return JSONResponse(content={"status": "error"}, status_code=400)
     
-    background_tasks.add_task(
-        slack_service.slack_events_handler, data, body, headers
-    )
+    event_type = data["event"]["type"]
+    if event_type == "app_mention":
+        background_tasks.add_task(
+            slack_service.slack_events_handler, data, body, headers
+        )
 
     if data["type"] == "url_verification":
         return JSONResponse(content={"challenge": data["challenge"]}, status_code=200)

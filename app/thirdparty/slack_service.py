@@ -4,7 +4,6 @@ from slack_sdk.errors import SlackApiError
 from services.train_agent_service import query_via_ai_agent
 from logging_module import logger
 
-event_id_list = []
 class SlackServiceAPI:
     def __init__(self):
         self.slack_client = WebClient(token=constants.SLACK_BOT_TOKEN)
@@ -25,18 +24,7 @@ class SlackServiceAPI:
             try:
                 slack_event = data
                 print(slack_event)
-
-                if "event_id" in slack_event:
-                    if slack_event["event_id"] in event_id_list:
-                        return {"status": "ok"}
-                    else:
-                        event_id_list.append(slack_event["event_id"])
-                        if len(event_id_list) > 10:
-                            event_id_list.pop(0)
-                        return {"status": "ok"}
                     
-                event_type = slack_event["event"]["type"]
-
                 if "challenge" in slack_event:
                     return {"challenge": slack_event["challenge"]}
 
@@ -44,6 +32,10 @@ class SlackServiceAPI:
                 user_message = slack_event["event"]["text"]
                 channel_id = slack_event["event"]["channel"]
                 user_id = slack_event["event"]["user"]
+                event_type = slack_event["event"]["type"]
+
+                if event_type != "app_mention":
+                    return {"status": "ok"}
 
                 bot_response = await query_via_ai_agent(user_message)
 
@@ -56,11 +48,8 @@ class SlackServiceAPI:
 
                 # Send response back to Slack
                 try:
-                    timestamp = headers.get("x-slack-request-timestamp")
-                    slack_signature = headers.get("x-slack-signature")
-                    event_id = slack_event["event_id"]
                     self.slack_client.chat_postMessage(
-                        channel=channel_id, text=f"<@{user_id}> {bot_response} {timestamp} {slack_signature} source: JSON {event_id} {event_id_list} {event_type}"
+                        channel=channel_id, text=f"<@{user_id}> {bot_response} Event: {event_type}"
                     )
                 except SlackApiError as e:
                     print(f"Error sending message: {e.response['error']}")
