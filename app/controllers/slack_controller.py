@@ -7,14 +7,21 @@ from fastapi.responses import JSONResponse
 router = APIRouter()
 
 
+existing_signatures = []
+
 @router.post("/events")
 async def slack_events_handler(request: Request, background_tasks: BackgroundTasks):
-    is_duplicate = slack_service.is_duplicate_request(headers)
-    if is_duplicate:
+    headers = request.headers
+    if existing_signatures and headers.get("X-Slack-Signature") in existing_signatures:
+        if len(existing_signatures) > 10:
+            existing_signatures.pop(0)
         return JSONResponse(content={"status": "ok"}, status_code=200)
+    
+    existing_signatures.append(headers.get("X-Slack-Signature"))
+
     logger.debug("Inside Slack events handler controller")
     body = await request.body()
-    headers = request.headers
+
 
     if headers.get("Content-Type") == "application/json":
         data = await request.json()
