@@ -44,6 +44,8 @@ class SlackServiceAPI:
                         event_id_list.pop(0)
                     return {"status": "ok"}
 
+                event_id_list.append(event_id)
+
                 bot_response = await query_via_ai_agent(user_message)
 
                 if bot_response["status_code"] == 500:
