@@ -9,8 +9,8 @@ from config import constants
 
 
 async def verify_slack_request(body, headers, signing_secret: str):
-    timestamp = headers.get("X-Slack-Request-Timestamp")
-    slack_signature = headers.get("X-Slack-Signature")
+    timestamp = headers.get("x-slack-request-timestamp")
+    slack_signature = headers.get("x-slack-signature")
 
     if abs(time.time() - int(timestamp)) > 300:
         raise HTTPException(status_code=400, detail="Request is too old.")
@@ -30,7 +30,7 @@ async def verify_slack_request(body, headers, signing_secret: str):
 async def slack_events_handler(data, body, headers):
     logger.debug("Inside Slack events handler controller")
     try:
-        content_type = headers.get("Content-Type")
+        content_type = headers.get("content-type")
         await verify_slack_request(
             body, headers, signing_secret=constants.SLACK_SIGNING_SECRET
         )
