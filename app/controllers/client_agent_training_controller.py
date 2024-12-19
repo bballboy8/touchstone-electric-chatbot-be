@@ -95,7 +95,7 @@ async def get_system_prompt():
 @router.post(
     "/process-tawk-query",
 )
-async def process_tawk_query(message: str = Form(...)):
+async def process_tawk_query(message: str):
     logger.debug("Inside Process Tawk Query controller")
     response = await services.process_tawk_query_service(message)
     logger.debug("Response from Process Tawk Query controller")
