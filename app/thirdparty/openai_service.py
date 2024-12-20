@@ -122,6 +122,7 @@ class OpenAIService:
                     Use the provided context to answer user queries effectively:
                     Context: {context}
                 """
+            prompt_template= "You works for Touchstone Electric. " + prompt_template
             return {"status_code": 200, "system_prompt": prompt_template}
         except Exception as e:
             return {
