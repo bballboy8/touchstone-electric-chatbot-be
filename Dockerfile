@@ -53,7 +53,7 @@ RUN echo "OPENAI_API_KEY=$OPENAI_API_KEY" && \
     echo "SERVICE_TITAN_APP_KEY=$SERVICE_TITAN_APP_KEY" && \
     echo "SERVICE_TITAN_BOOKING_PROVIDER_ID=$SERVICE_TITAN_BOOKING_PROVIDER_ID" && \
     echo "SLACK_BOT_TOKEN=$SLACK_BOT_TOKEN" && \
-    echo "SLACK_SIGNING_SECRET=$SLACK_SIGNING_SECRET" && \
+    echo "SLACK_SIGNING_SECRET=$SLACK_SIGNING_SECRET"
 
 # Run the FastAPI application
 CMD ["uvicorn", "main:project", "--host", "0.0.0.0", "--port", "8080"]
