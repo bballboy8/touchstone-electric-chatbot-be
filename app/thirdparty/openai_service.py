@@ -184,3 +184,69 @@ class OpenAIService:
                 "message": f"An error occurred while extracting user details: {e}",
                 "status_code": 500,
             }
+
+    async def generate_ai_agent_response_with_history(
+        self, context: str, query: str, previous_messages: list
+    ):
+        try:
+            system_prompt = await self.get_system_prompt_for_ai_agent(context)
+            if system_prompt.get("status_code") != 200:
+                return system_prompt
+
+            system_prompt = system_prompt.get("system_prompt")
+
+            response = await self.get_gpt_response_with_history(
+                prompt=query,
+                system_prompt=system_prompt,
+                previous_messages=previous_messages,
+            )
+            return response
+        except Exception as e:
+            return {
+                "message": f"An error occurred while Generating AI agent response via OpenAI API: {e}",
+                "status_code": 500,
+            }
+
+    async def get_gpt_response_with_history(
+        self, prompt: str, previous_messages: list, system_prompt: str
+    ) -> dict:
+        try:
+            logger.info("Sending prompt to OpenAI GPT API...")
+            messages = [
+                {"role": "system", "content": system_prompt},
+            ]
+            messages += previous_messages
+            messages.append({"role": "user", "content": prompt})
+
+
+            print("final messages", messages)
+
+            response = self.openai_client.chat.completions.create(
+                model="gpt-4o",
+                messages=messages,
+            )
+            if "errors" in response:
+                logger.error(
+                    f"An error occurred while processing the request: {response['errors']}"
+                )
+                return {
+                    "response": f"An error occurred while processing the request: {response['errors']}",
+                    "status_code": 500,
+                }
+            finish_reason = response.choices[0].finish_reason
+            response_data = response.choices[0].message.content
+            prompt_tokens = response.usage.prompt_tokens
+            completion_tokens = response.usage.completion_tokens
+            return {
+                "response": response_data,
+                "finish_reason": finish_reason,
+                "prompt_tokens": prompt_tokens,
+                "completion_tokens": completion_tokens,
+                "status_code": 200,
+            }
+        except Exception as e:
+            logger.error(f"An error occurred while processing the request: {e}")
+            return {
+                "response": f"An error occurred while processing the request: {e}",
+                "status_code": 500,
+            }

@@ -3,6 +3,7 @@ import services
 from logging_module import logger
 from fastapi import Form
 from fastapi.responses import JSONResponse
+from blueprints import BotPressRequest
 
 router = APIRouter()
 
@@ -98,5 +99,15 @@ async def get_system_prompt():
 async def process_tawk_query(message: str):
     logger.debug("Inside Process Tawk Query controller")
     response = await services.process_tawk_query_service(message)
+    logger.debug("Response from Process Tawk Query controller")
+    return JSONResponse(content=response, status_code=200)
+
+
+@router.post(
+    "/process-botpress-query",
+)
+async def process_botpress_query(request: BotPressRequest):
+    logger.debug("Inside Process Tawk Query controller")
+    response = await services.process_botpress_query_service(request.message, request.conversation_id)
     logger.debug("Response from Process Tawk Query controller")
     return JSONResponse(content=response, status_code=200)
