@@ -11,6 +11,7 @@ import uuid
 from models import ServiceTitanBookingRequest, ServiceTitanCustomerContact
 from services.service_titan_service import create_booking_request
 from config import constants
+import requests
 
 
 async def extract_useful_pages(pdf_path, min_words=20, skip_keywords=None):
@@ -189,7 +190,6 @@ async def handle_booking_request(user_query: str):
         return {"message": "An error occurred while processing your booking.", "error": str(e)}
 
 
-
 async def query_via_ai_agent(query: str, knowledge_book_name: str = None):
     try:
         pinecone_client = PineConeDBService()
@@ -235,8 +235,6 @@ async def query_via_ai_agent(query: str, knowledge_book_name: str = None):
         return {"status_code": 500, "response": f"Error while querying the agent: {e}"}
 
 
-
-
 async def process_tawk_query_service(query: str, knowledge_book_name: str = None):
     try:
         pinecone_client = PineConeDBService()
@@ -247,18 +245,17 @@ async def process_tawk_query_service(query: str, knowledge_book_name: str = None
             if response["status_code"] != 200:
                 return response
             return {"message": "Booking request created successfully", "status_code": 200, "response": response["response"]}
-   
+
         if knowledge_book_name:
             response = await get_current_knowledge_books_service()
             if response["status_code"] != 200:
                 return response
-            
+
             if knowledge_book_name not in response["response"]:
                 return {
                     "status_code": 400,
                     "response": f"Knowledge Book '{knowledge_book_name}' does not exist.",
                 }
-            
 
         response = await pinecone_client.query_data(query, 3, knowledge_book_name)
         if response["status_code"] != 200:
@@ -269,6 +266,96 @@ async def process_tawk_query_service(query: str, knowledge_book_name: str = None
         context = " ".join([match["metadata"]["text"] for match in matches])
         response = await openai_client.generate_ai_agent_response(
             context=context, query=query
+        )
+        if response["status_code"] != 200:
+            return response
+        return {
+            "response": response["response"],
+            "status_code": 200,
+        }
+    except Exception as e:
+        return {"status_code": 500, "response": f"Error while querying the agent: {e}"}
+
+
+async def get_user_conversation_from_botpress(conversation_id: str):
+    try:
+        url = f"{constants.BOTPRESS_MESSAGE_ENDPOINT}?conversationId={conversation_id}"
+
+        headers = {
+            "accept": "application/json",
+            "x-bot-id": constants.BOTPRESS_BOT_ID,
+            "authorization": f"Bearer {constants.BOTPRESS_PAT}",
+        }
+
+        response = requests.get(url, headers=headers)
+        data = convert_to_openai_messages(response.json())
+        return {
+            "status_code": 200,
+            "response": data,
+        }
+    except Exception as e:
+        return {
+            "status_code": 500,
+            "response": f"Error while getting user conversation: {e}",
+        }
+
+
+def convert_to_openai_messages(data):
+    """
+    Converts a custom message format to an OpenAI-compatible message list.
+
+    Args:
+        data (dict): Input data containing the messages.
+
+    Returns:
+        list: List of messages in OpenAI-compatible format.
+    """
+    openai_messages = []
+
+    for message in data.get("messages", []):
+        role = "assistant" if message.get("direction") == "outgoing" else "user"
+        content = message.get("payload", {}).get("text", "")
+        if content:  # Only add messages with non-empty content
+            openai_messages.append({"role": role, "content": content})
+
+    return openai_messages
+
+
+async def process_botpress_query_service(query: str, conversation_id: str):
+    logger.debug("Inside Process Botpress Query controller")
+    logger.debug(f"Query: {query} Conversation ID: {conversation_id}")
+    try:
+        pinecone_client = PineConeDBService()
+        openai_client = OpenAIService()
+
+        if detect_booking_intent(query):
+            response = await handle_booking_request(query)
+            if response["status_code"] != 200:
+                return response
+            return {
+                "message": "Booking request created successfully",
+                "status_code": 200,
+                "response": response["response"],
+            }
+
+        response = await pinecone_client.query_data(query, 3, None)
+        if response["status_code"] != 200:
+            return response
+
+        matches = response["response"]["matches"]
+
+        context = " ".join([match["metadata"]["text"] for match in matches])
+
+        conversation_response = await get_user_conversation_from_botpress(
+            conversation_id
+        )
+        if conversation_response["status_code"] != 200:
+            return conversation_response
+        
+        previous_messages = conversation_response["response"]
+
+        response = await openai_client.generate_ai_agent_response_with_history(
+            context=context, query=query, previous_messages=previous_messages[::-1]
         )
         if response["status_code"] != 200:
             return response
