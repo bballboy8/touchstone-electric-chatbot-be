@@ -43,9 +43,6 @@ jobs:
             --build-arg SERVICE_TITAN_BOOKING_PROVIDER_ID=${{ secrets.SERVICE_TITAN_BOOKING_PROVIDER_ID }} \
             --build-arg SLACK_BOT_TOKEN=${{ secrets.SLACK_BOT_TOKEN }} \
             --build-arg SLACK_SIGNING_SECRET=${{ secrets.SLACK_SIGNING_SECRET }} \
-            --build-arg BOTPRESS_MESSAGE_ENDPOINT=${{ secrets.BOTPRESS_MESSAGE_ENDPOINT }} \
-            --build-arg BOTPRESS_BOT_ID=${{ secrets.BOTPRESS_BOT_ID }} \
-            --build-arg BOTPRESS_PAT=${{ secrets.BOTPRESS_PAT }} \
             -t $IMAGE .
           docker push $IMAGE
 
