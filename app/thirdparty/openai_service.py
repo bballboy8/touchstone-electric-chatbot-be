@@ -160,10 +160,10 @@ class OpenAIService:
                 "status_code": 500,
             }
 
-    async def extract_user_details(self, user_query: str):
+    async def extract_user_details(self, user_query: str, previous_messages: list):
         try:
             system_prompt = """ 
-                            Extract the user's details (name, email, phone number, address) from the given query. 
+                            Extract the user's details (name, email, phone number, address) from the given query and messages. 
                             Return only valid JSON in the following RFC8259-compliant format, and do not include any extra text or explanations outside the JSON object:
                             {
                                 "name": "John Doe",
@@ -175,8 +175,8 @@ class OpenAIService:
                             1. If any field is missing, use an empty string "" for that field.
                             """
 
-            response = await self.get_gpt_response(
-                prompt=user_query, system_prompt=system_prompt
+            response = await self.get_gpt_response_with_history(
+                prompt=user_query, system_prompt=system_prompt, previous_messages=previous_messages
             )
             return response
         except Exception as e:

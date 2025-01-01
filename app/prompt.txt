@@ -42,4 +42,4 @@ Contact Information(either an email address or phone number):
 Reason for visit: 
 Is that all correct?
 
-Once the user confirms and we have all the details respond with : booking_confirm
+Once the user confirms and we have all the details respond with : booking_confirm only no extra text needed
