@@ -288,6 +288,7 @@ async def get_user_conversation_from_botpress(conversation_id: str):
         }
 
         response = requests.get(url, headers=headers)
+        response.raise_for_status()
         data = convert_to_openai_messages(response.json())
         return {
             "status_code": 200,
@@ -310,15 +311,19 @@ def convert_to_openai_messages(data):
     Returns:
         list: List of messages in OpenAI-compatible format.
     """
-    openai_messages = []
+    try:
+        openai_messages = []
 
-    for message in data.get("messages", []):
-        role = "assistant" if message.get("direction") == "outgoing" else "user"
-        content = message.get("payload", {}).get("text", "")
-        if content:  # Only add messages with non-empty content
-            openai_messages.append({"role": role, "content": content})
+        for message in data.get("messages", []):
+            role = "assistant" if message.get("direction") == "outgoing" else "user"
+            content = message.get("payload", {}).get("text", "")
+            if content:  # Only add messages with non-empty content
+                openai_messages.append({"role": role, "content": content})
 
-    return openai_messages
+        return openai_messages
+    except Exception as e:
+        logger.error(f"Error converting messages: {e}")
+        return []
 
 
 async def process_botpress_query_service(query: str, conversation_id: str):
@@ -328,14 +333,14 @@ async def process_botpress_query_service(query: str, conversation_id: str):
         pinecone_client = PineConeDBService()
         openai_client = OpenAIService()
 
-        if detect_booking_intent(query):
+        intent = detect_booking_intent(query) 
+        if intent:
             response = await handle_booking_request(query)
             if response["status_code"] != 200:
                 return response
             return {
-                "message": "Booking request created successfully",
+                "response": f"Your appointment successfully scheduled with booking ID: {response['response']['id']}",
                 "status_code": 200,
-                "response": response["response"],
             }
 
         response = await pinecone_client.query_data(query, 3, None)
@@ -349,6 +354,7 @@ async def process_botpress_query_service(query: str, conversation_id: str):
         conversation_response = await get_user_conversation_from_botpress(
             conversation_id
         )
+
         if conversation_response["status_code"] != 200:
             return conversation_response
         
