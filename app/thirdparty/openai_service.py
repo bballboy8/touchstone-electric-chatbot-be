@@ -250,3 +250,20 @@ class OpenAIService:
                 "response": f"An error occurred while processing the request: {e}",
                 "status_code": 500,
             }
+
+    async def get_conversation_summary(self, conversation: list):
+        try:
+            system_prompt = """ 
+                            Summarize the conversation between the user and the AI agent. 
+                            Return a concise summary of the conversation in a few sentences.
+                            """
+
+            response = await self.get_gpt_response_with_history(
+                prompt="Generate Summary", system_prompt=system_prompt, previous_messages=conversation
+            )
+            return response
+        except Exception as e:
+            return {
+                "message": f"An error occurred while generating conversation summary: {e}",
+                "status_code": 500,
+            }

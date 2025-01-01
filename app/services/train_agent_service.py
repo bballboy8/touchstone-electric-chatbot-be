@@ -185,14 +185,14 @@ async def extract_booking_data(user_query: str, previous_messages: list = None):
         logger.error(f"Error extracting booking data: {e}")
         return {"message": "An error occurred while extracting booking data.", "error": str(e), "status_code": 500}
 
-async def handle_booking_request(user_query: str, previous_messages: list = None):
+async def handle_booking_request(user_query: str, conversation_summary: str = None, previous_messages: list = None):
     try:
         booking_data = await extract_booking_data(user_query, previous_messages)
         if booking_data["status_code"] != 200:
             return booking_data
 
         booking_data = booking_data["data"]
-        response = await create_booking_request(booking_data)
+        response = await create_booking_request(booking_data, conversation_summary)
         if response["status_code"] != 200:
             return response
         
@@ -379,7 +379,9 @@ async def process_botpress_query_service(query: str, conversation_id: str):
             return response
         
         if "booking_confirm" in response["response"]:
-            response = await handle_booking_request(query, previous_messages)
+            conversation_summary = openai_client.get_conversation_summary(previous_messages)
+            summary = conversation_summary["response"]
+            response = await handle_booking_request(user_query=query, conversation_summary=summary)
             if response["status_code"] != 200:
                 return response
             return {

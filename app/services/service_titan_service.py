@@ -116,11 +116,11 @@ async def get_customer_by_id(customer_id: int):
         logger.error(f"Error getting Service Titan customer by id: {e}")
         return {"status_code": 500, "data": f"Internal server error:{e}"}
     
-async def create_booking_request(booking_data: ServiceTitanBookingRequest):
+async def create_booking_request(booking_data: ServiceTitanBookingRequest, conversation_summary: str = None):
     logger.info("Creating Service Titan booking request")
     try:
         service_titan_api_service = ServiceTitanApiService()
-        response = await service_titan_api_service.create_booking(booking_data)
+        response = await service_titan_api_service.create_booking(booking_data, conversation_summary)
         if response["status_code"] != 200:
             return response
         logger.info("Service Titan booking request created")
