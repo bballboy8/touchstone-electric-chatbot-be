@@ -140,9 +140,19 @@ async def upload_pdf_for_training_agent(file: UploadFile = File(...), knowledge_
             os.remove(temp_file_path)
         return {"status_code": 500, "message": f"Error while training agent: {e}"}
 
-def detect_booking_intent(user_query: str) -> bool:
-    keywords = constants.BOOKING_INTENT_CONSTANTS
-    return any(keyword in user_query for keyword in keywords)
+async def detect_booking_intent(user_query: str, previous_messages: list):
+    try:
+        openai_service = OpenAIService()
+        response = await openai_service.get_query_intent(user_query, previous_messages)
+        if response["status_code"] != 200:
+            return False
+        return response["intent"]
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        logger.error(f"Error detecting booking intent: {e}")
+        return False
+
 
 async def extract_booking_data(user_query: str):
     try:
@@ -196,7 +206,7 @@ async def query_via_ai_agent(query: str, knowledge_book_name: str = None):
         pinecone_client = PineConeDBService()
         openai_client = OpenAIService()
 
-        if detect_booking_intent(query):
+        if await detect_booking_intent(query):
             response =  await handle_booking_request(query)
             if response["status_code"] != 200:
                 return response
@@ -241,7 +251,7 @@ async def process_tawk_query_service(query: str, knowledge_book_name: str = None
         pinecone_client = PineConeDBService()
         openai_client = OpenAIService()
 
-        if detect_booking_intent(query):
+        if await detect_booking_intent(query):
             response =  await handle_booking_request(query)
             if response["status_code"] != 200:
                 return response
@@ -343,19 +353,16 @@ async def process_botpress_query_service(query: str, conversation_id: str):
                 "status_code": 400,
                 "response": "Your message contains potentially malicious content. Please striclty use our service for your Electrical needs only.",
             }
+        conversation_response = await get_user_conversation_from_botpress(
+            conversation_id
+        )
+        if conversation_response["status_code"] != 200:
+            return conversation_response
+        
+        previous_messages = conversation_response["response"][::-1]
 
         pinecone_client = PineConeDBService()
         openai_client = OpenAIService()
-
-        intent = detect_booking_intent(query) 
-        if intent:
-            response = await handle_booking_request(query)
-            if response["status_code"] != 200:
-                return response
-            return {
-                "response": f"Your appointment successfully scheduled with booking ID: {response['response']['id']}",
-                "status_code": 200,
-            }
 
         response = await pinecone_client.query_data(query, 3, None)
         if response["status_code"] != 200:
@@ -365,20 +372,21 @@ async def process_botpress_query_service(query: str, conversation_id: str):
 
         context = " ".join([match["metadata"]["text"] for match in matches])
 
-        conversation_response = await get_user_conversation_from_botpress(
-            conversation_id
-        )
-
-        if conversation_response["status_code"] != 200:
-            return conversation_response
-        
-        previous_messages = conversation_response["response"]
-
         response = await openai_client.generate_ai_agent_response_with_history(
-            context=context, query=query, previous_messages=previous_messages[::-1]
+            context=context, query=query, previous_messages=previous_messages
         )
         if response["status_code"] != 200:
             return response
+        
+        if response["response"] == "booking_confirm":
+            response = await handle_booking_request(query)
+            if response["status_code"] != 200:
+                return response
+            return {
+                "response": f"Your appointment successfully scheduled with booking ID: {response['response']['id']}",
+                "status_code": 200,
+            }
+        
         return {
             "response": response["response"],
             "status_code": 200,

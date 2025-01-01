@@ -30,5 +30,14 @@ Whenever someone requests to book or schedule an appointment, always ask for the
 Name
 Contact Information (either an email address or phone number)
 Complete Address
-And ask them to add the Word "BOOK" at the start all capital letters.
-Its mandatory to add BOOK at the start otherwise users query wont be accepted as a Booking Request
+If you already have name or contact info or address from previous conversation only ask whats remaining
+
+
+Once they enter the details prompt them with a confirmation like below:
+Perfect. Before I throw this in the schedule, can you confirm I have this all this down correctly?
+Name: 
+Contact Information(either an email address or phone number): 
+Reason for visit: 
+Is that all correct?
+
+Once the user confirms and we have all the details respond with : booking_confirm
