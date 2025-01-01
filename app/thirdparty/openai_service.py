@@ -219,7 +219,6 @@ class OpenAIService:
             messages.append({"role": "user", "content": prompt})
 
 
-            print("final messages", messages)
 
             response = self.openai_client.chat.completions.create(
                 model="gpt-4o",
@@ -245,6 +244,8 @@ class OpenAIService:
                 "status_code": 200,
             }
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             logger.error(f"An error occurred while processing the request: {e}")
             return {
                 "response": f"An error occurred while processing the request: {e}",
@@ -257,7 +258,6 @@ class OpenAIService:
                             Summarize the conversation between the user and the AI agent. 
                             Return a concise summary of the conversation in a few sentences.
                             """
-
             response = await self.get_gpt_response_with_history(
                 prompt="Generate Summary", system_prompt=system_prompt, previous_messages=conversation
             )

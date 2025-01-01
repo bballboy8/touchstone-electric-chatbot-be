@@ -381,7 +381,7 @@ async def process_botpress_query_service(query: str, conversation_id: str):
         if "booking_confirm" in response["response"]:
             conversation_summary = await openai_client.get_conversation_summary(previous_messages)
             summary = conversation_summary["response"]
-            response = await handle_booking_request(user_query=query, conversation_summary=summary)
+            response = await handle_booking_request(user_query=query, conversation_summary=summary, previous_messages=previous_messages)
             if response["status_code"] != 200:
                 return response
             return {
@@ -394,4 +394,6 @@ async def process_botpress_query_service(query: str, conversation_id: str):
             "status_code": 200,
         }
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return {"status_code": 500, "response": f"Error while querying the agent: {e}"}
