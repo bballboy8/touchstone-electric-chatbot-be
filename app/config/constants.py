@@ -45,3 +45,13 @@ BOTPRESS_PAT="bp_pat_0OJIp1WPAK2jKoI3sHwB65teRCEQsqkU2B8N"
 
 
 BOOKING_INTENT_CONSTANTS = ["BOOK", "APPOINTMENT", "SCHEDULE", "RESERVE"]
+
+
+dangerous_patterns = [
+    r"(\{|\}|\[|\]|\<|\>|\;|\!|\&|\$|\=|\$)",  # Common dangerous characters like braces, semicolons, etc.
+    r"(exec|eval|import|os\.system|__import__)",  # Malicious Python commands
+    r"ignore[ \t]*previous[ \t]*instructions",  # Attempts to change the model's behavior
+    r"drop\s+database",  # Example of SQL injection attempts
+    r"alert\(",  # Common for JavaScript injection attempts
+    r"document\.location",  # Common JavaScript-based attacks
+]

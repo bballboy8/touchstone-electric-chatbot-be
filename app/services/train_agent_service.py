@@ -12,6 +12,7 @@ from models import ServiceTitanBookingRequest, ServiceTitanCustomerContact
 from services.service_titan_service import create_booking_request
 from config import constants
 import requests
+import re
 
 
 async def extract_useful_pages(pdf_path, min_words=20, skip_keywords=None):
@@ -324,12 +325,25 @@ def convert_to_openai_messages(data):
     except Exception as e:
         logger.error(f"Error converting messages: {e}")
         return []
+    
+
+def check_for_malicious_content(query):
+    for pattern in constants.dangerous_patterns:
+        if re.search(pattern, query, re.IGNORECASE):
+            return True
+    return None
 
 
 async def process_botpress_query_service(query: str, conversation_id: str):
     logger.debug("Inside Process Botpress Query controller")
     logger.debug(f"Query: {query} Conversation ID: {conversation_id}")
     try:
+        if check_for_malicious_content(query):
+            return {
+                "status_code": 400,
+                "response": "Your message contains potentially malicious content. Please striclty use our service for your Electrical needs only.",
+            }
+
         pinecone_client = PineConeDBService()
         openai_client = OpenAIService()
 
