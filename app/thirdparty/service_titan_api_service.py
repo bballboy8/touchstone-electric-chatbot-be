@@ -200,7 +200,7 @@ class ServiceTitanApiService:
             return {"status_code": 500, "data": f"Internal server error: {e}"}
         
     @retry(wait=wait_fixed(2), stop=stop_after_attempt(3))
-    async def send_request_async(url, headers, data):
+    async def send_request_async(self, url, headers, data):
         async with httpx.AsyncClient() as client:
             try:
                 response = await client.post(url, headers=headers, json=data)
@@ -242,6 +242,8 @@ class ServiceTitanApiService:
             response.raise_for_status()
             return {"status_code": 200, "data": response.json()}
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             return {"status_code": 500, "data": f"Internal server error: {e}"}
 
     async def get_customer_contacts_by_name(self, name:str):
