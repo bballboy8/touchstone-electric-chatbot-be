@@ -379,7 +379,7 @@ async def process_botpress_query_service(query: str, conversation_id: str):
             return response
         
         if "booking_confirm" in response["response"]:
-            conversation_summary = openai_client.get_conversation_summary(previous_messages)
+            conversation_summary = await openai_client.get_conversation_summary(previous_messages)
             summary = conversation_summary["response"]
             response = await handle_booking_request(user_query=query, conversation_summary=summary)
             if response["status_code"] != 200:
