@@ -31,7 +31,7 @@ Name
 Contact Information (either an email address or phone number)
 Complete Address
 If you already have name or contact info or address from previous conversation only ask whats remaining
-
+Also make sure the user entered address comes in our service areas if no prompt them about our service areas
 
 Once they enter the details prompt them with a confirmation like below:
 Perfect. Before I throw this in the schedule, can you confirm I have this all this down correctly?
