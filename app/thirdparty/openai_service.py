@@ -163,13 +163,14 @@ class OpenAIService:
     async def extract_user_details(self, user_query: str, previous_messages: list):
         try:
             system_prompt = """ 
-                            Extract the user's details (name, email, phone number, address) from the given query and messages. 
+                            Extract the user's details (name, email, phone number, address, visit date and time) from the given query and messages. 
                             Return only valid JSON in the following RFC8259-compliant format, and do not include any extra text or explanations outside the JSON object:
                             {
                                 "name": "John Doe",
                                 "email": "email@email.com",
                                 "phone": "1234567890",
-                                "address": "123, Street Name, City, Country"
+                                "address": "123, Street Name, City, Country",
+                                "start": "2022-01-01T00:00:00Z"
                             }
                             Ensure:
                             1. If any field is missing, use an empty string "" for that field.
