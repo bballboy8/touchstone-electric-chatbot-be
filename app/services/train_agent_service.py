@@ -185,6 +185,7 @@ async def extract_booking_data(user_query: str, previous_messages: list = None):
             isSendConfirmationEmail=True,
         ),
             "status_code": 200,
+            "raw_data": json_data,
         }
     except Exception as e:
         logger.error(f"Error extracting booking data: {e}")
@@ -196,12 +197,13 @@ async def handle_booking_request(user_query: str, conversation_summary: str = No
         if booking_data["status_code"] != 200:
             return booking_data
 
+        json_data = booking_data["raw_data"]
         booking_data = booking_data["data"]
         response = await create_booking_request(booking_data, conversation_summary)
         if response["status_code"] != 200:
             return response
         
-        return {"message": "Booking request created successfully", "status_code": 200, "response": response["data"], "booking_data": booking_data}
+        return {"message": "Booking request created successfully", "status_code": 200, "response": response["data"], "booking_data": json_data}
     except Exception as e:
         import traceback
         traceback.print_exc()
