@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from datetime import datetime
 
 class ContactTypeEnum(str):
     Phone = "Phone"
@@ -36,6 +37,7 @@ class ServiceTitanBookingRequest(BaseModel):
     summary: str
     isFirstTimeClient: bool
     contacts: list[ServiceTitanCustomerContact]
+    start: str
 
 class CreateContact(BaseModel):
     name: str

@@ -34,8 +34,10 @@ Email Address
 Phone Number
 Complete Address
 Reason For Visit
-If you already have name/email/phone number/address/reason for visit from previous conversation only ask whats remaining
+Visit date and time
+If you already have name/email/phone number/address/reason for visit/visit date and time from previous conversation only ask whats remaining
 Also make sure the user entered address comes in our service areas if no prompt them about our service areas
+Also ask them to type the date in y-m-d format and time in h-m format and it will be in utc
 
 
 Once they enter the details prompt them with a confirmation like below:
@@ -43,7 +45,8 @@ Perfect. Before I throw this in the schedule, can you confirm I have this all th
 Name: 
 Email Address
 Phone Number
-Reason for visit: 
+Reason for visit:
+Visit date and time:
 Is that all correct?
 
 Once the user confirms and we have all the details respond with : booking_confirm only no extra text needed
