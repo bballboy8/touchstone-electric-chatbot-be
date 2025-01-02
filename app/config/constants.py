@@ -55,3 +55,12 @@ dangerous_patterns = [
     r"alert\(",  # Common for JavaScript injection attempts
     r"document\.location",  # Common JavaScript-based attacks
 ]
+
+SLACK_CHANNEL_DICT = {
+    "new_leads": "C06HF7G0PQT",
+    "dispatching": "C070C3FEQJ1",
+    "collections": "C07QLFVK6D6",
+    "human-resources": "C07V5BTT8UC",
+    "dev-team": "C080R3ALW3V",
+    "customer-ai-agent-testing": "C083RC1MB09"
+}
