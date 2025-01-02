@@ -401,13 +401,10 @@ async def process_botpress_query_service(query: str, conversation_id: str):
                 return response
     
             booking_data = response["booking_data"]
-            message = f"""
-                        Please call {booking_data["name"]} at {booking_data["phone"]} located at {booking_data["address"]} to collect $49 hold and assign a technician.
-
-                        Summary:
-                        * Appointment Date: {booking_data["start"]}
-                        * Appointment Details: {summary}
-                    """
+            message = f"Please call {booking_data['name']} at {booking_data['phone']} located at {booking_data['address']} to collect $49 hold and assign a technician.\n\n" \
+                        f"Summary:\n" \
+                        f"* Appointment Date: {booking_data['start']}\n" \
+                        f"* Appointment Details: {summary}"
             logger.debug("Sending message to dispatching channel")
             await send_message_to_channel(
                 message=message, channel=constants.SLACK_CHANNEL_DICT["dispatching"]
