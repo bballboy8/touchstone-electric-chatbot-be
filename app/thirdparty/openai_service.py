@@ -256,7 +256,7 @@ class OpenAIService:
         try:
             system_prompt = """ 
                             Summarize the conversation between the user and the AI agent. 
-                            Return a concise summary of the conversation in a few sentences.
+                            Return a summary of the conversation including user details and reason for visit.
                             """
             response = await self.get_gpt_response_with_history(
                 prompt="Generate Summary", system_prompt=system_prompt, previous_messages=conversation
