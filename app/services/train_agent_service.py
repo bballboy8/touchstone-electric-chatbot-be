@@ -201,7 +201,7 @@ async def handle_booking_request(user_query: str, conversation_summary: str = No
         if response["status_code"] != 200:
             return response
         
-        return {"message": "Booking request created successfully", "status_code": 200, "response": response["data"]}
+        return {"message": "Booking request created successfully", "status_code": 200, "response": response["data"], "booking_data": booking_data}
     except Exception as e:
         import traceback
         traceback.print_exc()
@@ -342,7 +342,7 @@ def convert_to_openai_messages(data):
     except Exception as e:
         logger.error(f"Error converting messages: {e}")
         return []
-    
+
 
 def check_for_malicious_content(query):
     for pattern in constants.dangerous_patterns:
@@ -365,7 +365,7 @@ async def process_botpress_query_service(query: str, conversation_id: str):
         )
         if conversation_response["status_code"] != 200:
             return conversation_response
-        
+
         previous_messages = conversation_response["response"][::-1]
 
         pinecone_client = PineConeDBService()
@@ -384,31 +384,38 @@ async def process_botpress_query_service(query: str, conversation_id: str):
         )
         if response["status_code"] != 200:
             return response
-        
+
         if "booking_confirm" in response["response"]:
-            conversation_summary = await openai_client.get_conversation_summary(previous_messages)
+            conversation_summary = await openai_client.get_conversation_summary(
+                previous_messages
+            )
             summary = conversation_summary["response"]
-            response = await handle_booking_request(user_query=query, conversation_summary=summary, previous_messages=previous_messages)
+            response = await handle_booking_request(
+                user_query=query,
+                conversation_summary=summary,
+                previous_messages=previous_messages,
+            )
             if response["status_code"] != 200:
                 return response
-            print(response)
-            message =  f"""
-                            Philip Booked a Job
-                            Please call [customer name] at [phone number] located at [address] to collect $49 hold and assign a technician.
+    
+            booking_data = response["booking_data"]
+            message = f"""
+                        Please call {booking_data["name"]} at {booking_data["phone"]} located at {booking_data["address"]} to collect $49 hold and assign a technician.
 
-                            Summary:
-                            * Homeowner and first time caller, nonmember
-                            * Appointment Date: December 19th 2024 - 3:00pm - 5:00pm (EST)
-                            * Appointment Details: Two exterior outlets are not working - looked for GFCI outlet associated, can't find it - turning off all breakers did not help - Same side of house, not too far from each other
-                        """
+                        Summary:
+                        * Appointment Date: {booking_data["start"]}
+                        * Appointment Details: {summary}
+                    """
             logger.debug("Sending message to dispatching channel")
-            await send_message_to_channel(message=message, channel=constants.SLACK_CHANNEL_DICT["dispatching"])
+            await send_message_to_channel(
+                message=message, channel=constants.SLACK_CHANNEL_DICT["dispatching"]
+            )
             logger.debug("Message sent to dispatching channel")
             return {
                 "response": f"Your appointment successfully scheduled with booking ID: {response['response']['id']}",
                 "status_code": 200,
             }
-        
+
         return {
             "response": response["response"],
             "status_code": 200,
