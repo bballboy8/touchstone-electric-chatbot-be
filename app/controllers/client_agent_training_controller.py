@@ -108,6 +108,8 @@ async def process_tawk_query(message: str):
 )
 async def process_botpress_query(request: BotPressRequest):
     logger.debug("Inside Process Tawk Query controller")
+    if request.api_key != "123455d9ceb7d-365f-442d-b64a-6e26b944d6ad":
+        return JSONResponse(content={"error": "Invalid API Key"}, status_code=401)
     response = await services.process_botpress_query_service(request.message, request.conversation_id)
     logger.debug("Response from Process Tawk Query controller")
     return JSONResponse(content=response, status_code=200)
