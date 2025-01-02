@@ -13,6 +13,7 @@ from services.service_titan_service import create_booking_request
 from config import constants
 import requests
 import re
+from datetime import datetime
 
 
 async def extract_useful_pages(pdf_path, min_words=20, skip_keywords=None):
@@ -171,13 +172,15 @@ async def extract_booking_data(user_query: str, previous_messages: list = None):
         if "phone" in json_data and json_data["phone"]:
             contacts.append(ServiceTitanCustomerContact(type="MobilePhone", value=json_data["phone"]))
 
+        todays_date = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
         return {
             "data": ServiceTitanBookingRequest(
             source="AI Assistant",
             name=json_data.get("name", "Unknown User"),
             summary=user_query,
             isFirstTimeClient=True,
-            contacts=contacts
+            contacts=contacts,
+            start=json_data.get("start", todays_date),
         ),
             "status_code": 200,
         }
