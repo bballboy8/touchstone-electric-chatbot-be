@@ -38,6 +38,7 @@ class ServiceTitanBookingRequest(BaseModel):
     isFirstTimeClient: bool
     contacts: list[ServiceTitanCustomerContact]
     start: str
+    isSendConfirmationEmail: bool
 
 class CreateContact(BaseModel):
     name: str

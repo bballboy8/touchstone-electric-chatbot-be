@@ -181,6 +181,7 @@ async def extract_booking_data(user_query: str, previous_messages: list = None):
             isFirstTimeClient=True,
             contacts=contacts,
             start=json_data.get("start", todays_date),
+            isSendConfirmationEmail=True,
         ),
             "status_code": 200,
         }
