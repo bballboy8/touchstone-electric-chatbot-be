@@ -47,3 +47,28 @@ async def slack_events_handler(data, body, headers):
         logger.error(f"Error in slack_events_handler: {str(e)}")
         return {"status": "error", "message": str(e)}
 
+async def get_slack_channel_list(cursor: str = None):
+    logger.debug("Inside get slack channel list controller")
+    try:
+        slack_instance = SlackServiceAPI()
+        response = await slack_instance.get_slack_channels(cursor)
+        response_list = [{"id": channel["id"], "name": channel["name"]} for channel in response["channels"]]
+        return {"status": "ok", "data": response_list}
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        logger.error(f"Error in get_slack_channel_list: {str(e)}")
+        return {"status": "error", "message": str(e)}
+    
+async def send_message_to_channel(message: str, channel:str):
+    logger.debug("Inside send message to dispatch channel controller")
+    try:
+        slack_instance = SlackServiceAPI()
+        response = await slack_instance.send_message(message, channel)
+        return response
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        logger.error(f"Error in send_message_to_dispatch_channel: {str(e)}")
+        return {"status": "error", "message": str(e)}

@@ -1,9 +1,9 @@
 from slack_sdk import WebClient
 from config import constants
 from slack_sdk.errors import SlackApiError
-from services.train_agent_service import query_via_ai_agent
 from logging_module import logger
 import time
+from thirdparty.openai_service import OpenAIService
 
 event_id_list = []
 event_message_list = {}
@@ -17,11 +17,18 @@ class SlackServiceAPI:
             text=message,
         )
         return response
+    
+    async def get_slack_channels(self, cursor):
+        response = self.slack_client.conversations_list(
+            types="private_channel", cursor=cursor
+        )
+        return response
+
 
     # handle slack events
     async def handle_event(self, content_type, data, headers=None):
         logger.debug(f"Content-Type: {content_type}")
-
+        openai_service = OpenAIService()
         if content_type == "application/json":
             logger.debug("Handling JSON payload")
             try:
@@ -57,7 +64,7 @@ class SlackServiceAPI:
                 event_message_list[user_id] = user_message
                 event_message_list[user_id + "_time"] = time.time()
 
-                bot_response = await query_via_ai_agent(user_message)
+                bot_response = await openai_service
 
                 if bot_response["status_code"] == 500:
                     bot_response = (
@@ -96,7 +103,7 @@ class SlackServiceAPI:
                 user_id = slack_event["user_id"]
 
                 # Generate AI Response
-                bot_response = await query_via_ai_agent(user_message)
+                bot_response = {"status_code": 200, "response": "Hello"}
 
                 if bot_response["status_code"] == 500:
                     bot_response = (

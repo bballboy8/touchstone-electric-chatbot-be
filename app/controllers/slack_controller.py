@@ -3,6 +3,8 @@ import services
 from logging_module import logger
 from services import slack_service
 from fastapi.responses import JSONResponse
+from utils.dependencies import get_current_user_id
+
 
 router = APIRouter()
 
@@ -42,3 +44,9 @@ async def slack_events_handler(request: Request, background_tasks: BackgroundTas
 
     logger.debug("Response from Slack events handler controller")
     return JSONResponse(content={"status": "ok"}, status_code=200)
+
+@router.get("/get-slack-channel-list")
+async def get_slack_channel_list(cursor: str = None, user_id = Depends(get_current_user_id)):
+    logger.debug("Inside get slack channel list controller")
+    response = await slack_service.get_slack_channel_list(cursor)
+    return JSONResponse(content=response, status_code=200)

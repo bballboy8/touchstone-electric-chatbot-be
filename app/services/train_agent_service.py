@@ -10,6 +10,7 @@ import json
 import uuid
 from models import ServiceTitanBookingRequest, ServiceTitanCustomerContact
 from services.service_titan_service import create_booking_request
+from services.slack_service import send_message_to_channel
 from config import constants
 import requests
 import re
@@ -388,6 +389,18 @@ async def process_botpress_query_service(query: str, conversation_id: str):
             response = await handle_booking_request(user_query=query, conversation_summary=summary, previous_messages=previous_messages)
             if response["status_code"] != 200:
                 return response
+
+            message =  f"""
+                            Philip Booked a Job
+                            Please call [customer name] at [phone number] located at [address] to collect $49 hold and assign a technician.
+
+                            Summary:
+                            * Homeowner and first time caller, nonmember
+                            * Appointment Date: December 19th 2024 - 3:00pm - 5:00pm (EST)
+                            * Appointment Details: Two exterior outlets are not working - looked for GFCI outlet associated, can't find it - turning off all breakers did not help - Same side of house, not too far from each other
+                        """
+            await send_message_to_channel(message=message, channel=constants.SLACK_CHANNEL_DICT["dispatching"])
+
             return {
                 "response": f"Your appointment successfully scheduled with booking ID: {response['response']['id']}",
                 "status_code": 200,
