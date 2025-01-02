@@ -65,7 +65,7 @@ async def send_message_to_channel(message: str, channel:str):
     logger.debug("Inside send message to dispatch channel controller")
     try:
         slack_instance = SlackServiceAPI()
-        response = await slack_instance.send_message(message, channel)
+        response = await slack_instance.send_message(message=message, channel=channel)
         return response
     except Exception as e:
         import traceback

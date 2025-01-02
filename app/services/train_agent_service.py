@@ -203,7 +203,9 @@ async def handle_booking_request(user_query: str, conversation_summary: str = No
         
         return {"message": "Booking request created successfully", "status_code": 200, "response": response["data"]}
     except Exception as e:
-        return {"message": "An error occurred while processing your booking.", "error": str(e)}
+        import traceback
+        traceback.print_exc()
+        return {"message": "An error occurred while processing your booking.", "error": str(e), "status_code": 500}
 
 
 async def query_via_ai_agent(query: str, knowledge_book_name: str = None):
@@ -389,7 +391,7 @@ async def process_botpress_query_service(query: str, conversation_id: str):
             response = await handle_booking_request(user_query=query, conversation_summary=summary, previous_messages=previous_messages)
             if response["status_code"] != 200:
                 return response
-
+            print(response)
             message =  f"""
                             Philip Booked a Job
                             Please call [customer name] at [phone number] located at [address] to collect $49 hold and assign a technician.
@@ -399,8 +401,9 @@ async def process_botpress_query_service(query: str, conversation_id: str):
                             * Appointment Date: December 19th 2024 - 3:00pm - 5:00pm (EST)
                             * Appointment Details: Two exterior outlets are not working - looked for GFCI outlet associated, can't find it - turning off all breakers did not help - Same side of house, not too far from each other
                         """
+            logger.debug("Sending message to dispatching channel")
             await send_message_to_channel(message=message, channel=constants.SLACK_CHANNEL_DICT["dispatching"])
-
+            logger.debug("Message sent to dispatching channel")
             return {
                 "response": f"Your appointment successfully scheduled with booking ID: {response['response']['id']}",
                 "status_code": 200,
