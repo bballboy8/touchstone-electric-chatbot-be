@@ -185,6 +185,30 @@ class OpenAIService:
                 "message": f"An error occurred while extracting user details: {e}",
                 "status_code": 500,
             }
+        
+    async def extract_user_basic_details(self, user_query: str, previous_messages: list):
+        try:
+            system_prompt = """ 
+                            Extract the user's details (name, phone number, address) from the given query and messages. 
+                            Return only valid JSON in the following RFC8259-compliant format, and do not include any extra text or explanations outside the JSON object:
+                            {
+                                "name": "John Doe",
+                                "phone": "1234567890",
+                                "address": "123, Street Name, City, Country"
+                            }
+                            Ensure:
+                            1. If any field is missing, use an empty string "" for that field.
+                            """
+
+            response = await self.get_gpt_response_with_history(
+                prompt=user_query, system_prompt=system_prompt, previous_messages=previous_messages
+            )
+            return response
+        except Exception as e:
+            return {
+                "message": f"An error occurred while extracting user details: {e}",
+                "status_code": 500,
+            }
 
     async def generate_ai_agent_response_with_history(
         self, context: str, query: str, previous_messages: list
@@ -257,7 +281,7 @@ class OpenAIService:
         try:
             system_prompt = """ 
                             Summarize the conversation between the user and the AI agent. 
-                            Return a summary of the conversation and reason for visit. I already have user details you just need to add email in summary.
+                            Return a summary of the conversation and reason for visit. You only need to respond with conversation main points no need to include any contact details/address/visit date or time. If email is available please include that.
                             """
             response = await self.get_gpt_response_with_history(
                 prompt="Generate Summary", system_prompt=system_prompt, previous_messages=conversation

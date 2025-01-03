@@ -113,3 +113,10 @@ async def process_botpress_query(request: BotPressRequest):
     response = await services.process_botpress_query_service(request.message, request.conversation_id)
     logger.debug("Response from Process Tawk Query controller")
     return JSONResponse(content=response, status_code=200)
+
+@router.get("/get-botpress-conversation-history")
+async def get_botpress_conversation_history(conversation_id: str):
+    logger.debug("Inside Get Botpress Conversation History controller")
+    response = await services.get_user_conversation_from_botpress(conversation_id)
+    logger.debug("Response from Get Botpress Conversation History controller")
+    return response
