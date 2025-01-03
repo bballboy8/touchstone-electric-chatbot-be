@@ -18,6 +18,13 @@ class SlackServiceAPI:
         )
         return response
     
+    async def send_message_block(self, channel, blocks):
+        response = self.slack_client.chat_postMessage(
+            channel=channel,
+            blocks=blocks,
+        )
+        return response
+    
     async def get_slack_channels(self, cursor):
         response = self.slack_client.conversations_list(
             types="private_channel", cursor=cursor

@@ -10,7 +10,7 @@ import json
 import uuid
 from models import ServiceTitanBookingRequest, ServiceTitanCustomerContact
 from services.service_titan_service import create_booking_request
-from services.slack_service import send_message_to_channel
+from services.slack_service import send_block_to_channel
 from config import constants
 import requests
 import re
@@ -401,18 +401,30 @@ async def process_botpress_query_service(query: str, conversation_id: str):
                 return response
     
             booking_data = response["booking_data"]
-            message = f"Please call **{booking_data['name']}** at **{booking_data['phone']}** located at **{booking_data['address']}** to collect **$49 hold** and assign a technician.\n\n" \
-            f"**Summary:**\n" \
-            f"* **Appointment Date:** {booking_data['start']}\n" \
-            f"* **Appointment Details:** {summary}"
+
             logger.debug("Sending message to dispatching channel")
-            await send_message_to_channel(
-                message=message, channel=constants.SLACK_CHANNEL_DICT["dispatching"]
+            blocks = [
+                    {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"\nPlease call *{booking_data['name']}* at *{booking_data['phone']}* located at *{booking_data['address']}* to collect *$49 hold* and assign a technician."
+                    }
+                    },
+                    {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"*Summary:*\n• *Appointment Date:* {booking_data['start']}\n• *Appointment Details:* {summary}"
+                    }
+                    }
+                ]
+            await send_block_to_channel(
+                blocks=blocks, channel=constants.SLACK_CHANNEL_DICT["dispatching"]
             )
             logger.debug("Message sent to dispatching channel")
             return {
-                "response": f"Awesome. We're working on this now! We will call you shortly to collect a $49 hold (which we'll credit to any work you perform with us) and confirm we have your requested time onto one of our routes.
-                Your booking ID is {response['response']['id']}",
+                "response": f"Awesome. We're working on this now! We will call you shortly to collect a $49 hold (which we'll credit to any work you perform with us) and confirm we have your requested time onto one of our routes. Your booking ID is {response['response']['id']}",
                 "status_code": 200,
             }
 
