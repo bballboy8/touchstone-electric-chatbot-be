@@ -456,7 +456,7 @@ async def execute_hiring_intent(query: str, previous_messages: list):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f""" Conversation Summary: {summary}"""
+                    "text": f""" *Conversation Summary*: {summary}"""
                 }
                 }
             ]
