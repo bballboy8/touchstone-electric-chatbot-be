@@ -207,7 +207,7 @@ async def handle_booking_request(user_query: str, conversation_summary: str = No
     except Exception as e:
         import traceback
         traceback.print_exc()
-        return {"message": "An error occurred while processing your booking.", "error": str(e), "status_code": 500}
+        return {"message": "An error occurred while processing your booking.", "response": str(e), "status_code": 500}
 
 
 async def query_via_ai_agent(query: str, knowledge_book_name: str = None):
@@ -411,7 +411,8 @@ async def process_botpress_query_service(query: str, conversation_id: str):
             )
             logger.debug("Message sent to dispatching channel")
             return {
-                "response": f"Your appointment successfully scheduled with booking ID: {response['response']['id']}",
+                "response": f"Awesome. We're working on this now! We will call you shortly to collect a $49 hold (which we'll credit to any work you perform with us) and confirm we have your requested time onto one of our routes.
+                Your booking ID is {response['response']['id']}",
                 "status_code": 200,
             }
 
