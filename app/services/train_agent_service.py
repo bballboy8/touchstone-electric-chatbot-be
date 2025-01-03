@@ -188,6 +188,8 @@ async def extract_booking_data(user_query: str, previous_messages: list = None):
             "raw_data": json_data,
         }
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         logger.error(f"Error extracting booking data: {e}")
         return {"message": "An error occurred while extracting booking data.", "error": str(e), "status_code": 500}
 
@@ -352,6 +354,128 @@ def check_for_malicious_content(query):
             return True
     return None
 
+async def execute_booking_intent(query: str, previous_messages: list):
+    try:
+        openai_client = OpenAIService()
+
+        conversation_summary = await openai_client.get_conversation_summary(
+                    previous_messages
+                )
+        summary = conversation_summary["response"]
+        response = await handle_booking_request(
+            user_query=query,
+            conversation_summary=summary,
+            previous_messages=previous_messages,
+        )
+        if response["status_code"] != 200:
+            return response
+
+        booking_data = response["booking_data"]
+
+        logger.debug("Sending message to dispatching channel")
+        blocks = [
+                {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"\nPlease call *{booking_data['name']}* at *{booking_data['phone']}* located at *{booking_data['address']}* to collect *$49 hold* and assign a technician."
+                }
+                },
+                {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"*Summary:*\n• *Appointment Date:* {booking_data['start']}\n• *Appointment Details:* {summary}"
+                }
+                }
+            ]
+        await send_block_to_channel(
+            blocks=blocks, channel=constants.SLACK_CHANNEL_DICT["dispatching"]
+        )
+        logger.debug("Message sent to dispatching channel")
+        return {
+            "response": f"Awesome. We're working on this now! We will call you shortly to collect a $49 hold (which we'll credit to any work you perform with us) and confirm we have your requested time onto one of our routes. Your booking ID is {response['response']['id']}",
+            "status_code": 200,
+        }
+    except Exception as e:
+        return {"status_code": 500, "response": f"Error while executing booking intent: {e}"}
+    
+"""
+permitting, inspections, customer complaints, invoices, estimates/sales questions, change orders, hiring, warranty
+"""
+
+async def execute_permitting_intent(query: str, previous_messages: list):
+    pass
+
+async def execute_inspection_intent(query: str, previous_messages: list):
+    pass
+
+async def execute_customer_complaints_intent(query: str, previous_messages: list):
+    pass
+
+async def execute_invoices_intent(query: str, previous_messages: list):
+    pass
+
+async def execute_estimates_sales_questions_intent(query: str, previous_messages: list):
+    pass
+
+async def execute_change_orders_intent(query: str, previous_messages: list):
+    pass
+
+async def execute_hiring_intent(query: str, previous_messages: list):
+    try:
+        logger.debug("Inside Hiring Intent")
+        openai_client = OpenAIService()
+
+        conversation_summary = await openai_client.get_conversation_summary(
+                    previous_messages
+                )
+        summary = conversation_summary["response"]
+
+        response = await openai_client.extract_user_basic_details(query, previous_messages)
+        if response["status_code"] != 200:
+            return response
+
+        details = response["response"].replace("```json", "").replace("```", "").strip()
+
+        json_data = json.loads(details)
+        logger.debug(f"Extracted user details in json format: {json_data}")
+        customer_data = json_data
+
+        logger.debug("Sending message to human resource channel")
+        blocks = [
+                {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"""\n *{str(customer_data['name']).title()}* at *{customer_data['address']}* was asking about hiring. Please reach out to them at *{customer_data['phone']}*.
+                    """
+                }
+                },
+                {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f""" Conversation Summary: {summary}"""
+                }
+                }
+            ]
+        await send_block_to_channel(
+            blocks=blocks, channel=constants.SLACK_CHANNEL_DICT["human-resources"]
+        )
+        logger.debug("Message sent to dispatching channel")
+        return {
+            "response": f"Awesome, we're working on this now! We will call you shortly to discuss your hiring needs.",
+            "status_code": 200,
+        }
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return {"status_code": 500, "response": f"Error while executing booking intent: {e}"}
+
+async def execute_warranty_intent(query: str, previous_messages: list):
+    pass
+
 
 async def process_botpress_query_service(query: str, conversation_id: str):
     logger.debug("Inside Process Botpress Query controller")
@@ -378,7 +502,6 @@ async def process_botpress_query_service(query: str, conversation_id: str):
             return response
 
         matches = response["response"]["matches"]
-
         context = " ".join([match["metadata"]["text"] for match in matches])
 
         response = await openai_client.generate_ai_agent_response_with_history(
@@ -387,46 +510,15 @@ async def process_botpress_query_service(query: str, conversation_id: str):
         if response["status_code"] != 200:
             return response
 
-        if "booking_confirm" in response["response"]:
-            conversation_summary = await openai_client.get_conversation_summary(
-                previous_messages
-            )
-            summary = conversation_summary["response"]
-            response = await handle_booking_request(
-                user_query=query,
-                conversation_summary=summary,
-                previous_messages=previous_messages,
-            )
-            if response["status_code"] != 200:
-                return response
-    
-            booking_data = response["booking_data"]
 
-            logger.debug("Sending message to dispatching channel")
-            blocks = [
-                    {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": f"\nPlease call *{booking_data['name']}* at *{booking_data['phone']}* located at *{booking_data['address']}* to collect *$49 hold* and assign a technician."
-                    }
-                    },
-                    {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": f"*Summary:*\n• *Appointment Date:* {booking_data['start']}\n• *Appointment Details:* {summary}"
-                    }
-                    }
-                ]
-            await send_block_to_channel(
-                blocks=blocks, channel=constants.SLACK_CHANNEL_DICT["dispatching"]
-            )
-            logger.debug("Message sent to dispatching channel")
-            return {
-                "response": f"Awesome. We're working on this now! We will call you shortly to collect a $49 hold (which we'll credit to any work you perform with us) and confirm we have your requested time onto one of our routes. Your booking ID is {response['response']['id']}",
-                "status_code": 200,
-            }
+        if "booking_confirm" in response["response"]:
+            response = await execute_booking_intent(query, previous_messages)
+            return response
+        
+        if "event_hiring" in response["response"]:
+            response = await execute_hiring_intent(query, previous_messages)
+            return response
+        
 
         return {
             "response": response["response"],
