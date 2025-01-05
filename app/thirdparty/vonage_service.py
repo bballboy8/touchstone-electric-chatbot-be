@@ -15,9 +15,10 @@ class VonageApi:
 
     def send_sms(self, to, text):
         try:
+            logger.info(f"Sending SMS to {to} with text: {text}")
             response = self.vonage_client.messages.send(
                 Sms(
-                    to="919993227728",
+                    to=to,
                     from_=constants.VONAGE_FROM_NUMBER,
                     text=text,
                 )
@@ -27,4 +28,21 @@ class VonageApi:
             return {"status_code": 200, "data": response.message_uuid}
         except Exception as e:
             logger.error(f"Error in send_sms: {e}")
+            return {"status_code": 500, "data": f"Internal Server Error: {e}"}
+        
+    def send_whatsapp_message(self, to, text):
+        try:
+            response = self.vonage_client.messages.send(
+                Sms(
+                    to=to,
+                    from_=constants.VONAGE_FROM_NUMBER,
+                    text=text,
+                    channel="whatsapp",
+                )
+            )
+
+            logger.info(f"Vonage WhatsApp response: {response}")
+            return {"status_code": 200, "data": response.message_uuid}
+        except Exception as e:
+            logger.error(f"Error in send_whatsapp_message: {e}")
             return {"status_code": 500, "data": f"Internal Server Error: {e}"}
