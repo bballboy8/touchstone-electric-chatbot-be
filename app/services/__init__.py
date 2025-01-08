@@ -10,3 +10,4 @@ from .train_agent_service import *
 from .client_agent_training_service import *
 from .service_titan_service import *
 from .slack_service import *
+from .vonage_service import *
