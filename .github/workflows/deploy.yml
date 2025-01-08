@@ -47,7 +47,6 @@ jobs:
             --build-arg VONAGE_API_SECRET=${{ secrets.VONAGE_API_SECRET }} \
             --build-arg VONAGE_FROM_NUMBER=${{ secrets.VONAGE_FROM_NUMBER }} \
             --build-arg VONAGE_APPLICATION_ID=${{ secrets.VONAGE_APPLICATION_ID }} \
-
             -t $IMAGE .
           docker push $IMAGE
 
@@ -61,4 +60,3 @@ jobs:
             --platform managed \
             --region us-central1 \
             --allow-unauthenticated
-
