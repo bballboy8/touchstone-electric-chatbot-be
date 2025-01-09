@@ -66,7 +66,6 @@ dangerous_patterns = [
 
 # Slack Channel Dictionary
 SLACK_CHANNEL_DICT = {
-    "new_lead": "C06HF7G0PQT", #done
     "dispatching": "C070C3FEQJ1", #done
     "permit": "C073V2Q500M", #done
     "inspection": "C073V2Q500M", #done
