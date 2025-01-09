@@ -127,6 +127,6 @@ async def create_booking_request(booking_data: ServiceTitanBookingRequest, conve
         return {"status_code": 200, "data": response["data"]}
     except Exception as e:
         logger.error(f"Error creating Service Titan booking request: {e}")
-        return {"status_code": 500, "data": f"Internal server error:{e}"}
+        return {"status_code": 500, "data": f"Internal server error:{e}", "response": f"{e}"}
 
     
