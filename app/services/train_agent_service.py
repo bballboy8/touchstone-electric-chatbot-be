@@ -408,7 +408,7 @@ async def execute_intent(query: str, previous_messages: list, event_name: str):
     try:
         openai_client = OpenAIService()
 
-        conversation_summary = await openai_client.get_conversation_summary(
+        conversation_summary = await openai_client.get_general_conversation_summary(
                     previous_messages
                 )
         summary = conversation_summary["response"]
@@ -429,7 +429,7 @@ async def execute_intent(query: str, previous_messages: list, event_name: str):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"""\n *{str(customer_data['name']).title()}* at *{customer_data['address']}* was asking about {event_name.replace('event_', '')}. Please reach out to them at *{customer_data['phone']}*.
+                    "text": f"""\n Please call *{str(customer_data['name']).title()}* from *{customer_data['address']}* at *{customer_data['phone']}*.
                     """
                 }
                 },

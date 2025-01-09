@@ -292,3 +292,19 @@ class OpenAIService:
                 "message": f"An error occurred while generating conversation summary: {e}",
                 "status_code": 500,
             }
+        
+    async def get_general_conversation_summary(self, conversation: list):
+        try:
+            system_prompt = """ 
+                            Summarize the conversation between the user and the AI agent. 
+                            Return a summary of the conversation. You only need to respond with conversation main points no need to include any contact details/address/visit date or time. If email is available please include that.
+                            """
+            response = await self.get_gpt_response_with_history(
+                prompt="Generate Summary", system_prompt=system_prompt, previous_messages=conversation
+            )
+            return response
+        except Exception as e:
+            return {
+                "message": f"An error occurred while generating conversation summary: {e}",
+                "status_code": 500,
+            }
