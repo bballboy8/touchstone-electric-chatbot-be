@@ -404,23 +404,58 @@ async def execute_booking_intent(query: str, previous_messages: list):
 permitting, inspections, customer complaints, invoices, estimates/sales questions, change orders, hiring, warranty
 """
 
-async def execute_permitting_intent(query: str, previous_messages: list):
-    pass
+async def execute_intent(query: str, previous_messages: list, event_name: str):
+    try:
+        openai_client = OpenAIService()
 
-async def execute_inspection_intent(query: str, previous_messages: list):
-    pass
+        conversation_summary = await openai_client.get_conversation_summary(
+                    previous_messages
+                )
+        summary = conversation_summary["response"]
 
-async def execute_customer_complaints_intent(query: str, previous_messages: list):
-    pass
+        response = await openai_client.extract_user_basic_details(query, previous_messages)
+        if response["status_code"] != 200:
+            return response
 
-async def execute_invoices_intent(query: str, previous_messages: list):
-    pass
+        details = response["response"].replace("```json", "").replace("```", "").strip()
+        print(response, "AI response")
+        json_data = json.loads(details)
+        logger.debug(f"Extracted user details in json format: {json_data}")
+        customer_data = json_data
 
-async def execute_estimates_sales_questions_intent(query: str, previous_messages: list):
-    pass
+        logger.debug("Sending message to dispatching channel")
+        blocks = [
+                {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"""\n *{str(customer_data['name']).title()}* at *{customer_data['address']}* was asking about {event_name.replace('event_', '')}. Please reach out to them at *{customer_data['phone']}*.
+                    """
+                }
+                },
+                {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f""" *Conversation Summary*: {summary}"""
+                }
+                }
+            ]
 
-async def execute_change_orders_intent(query: str, previous_messages: list):
-    pass
+        channel = constants.SLACK_CHANNEL_DICT.get(event_name.replace("event_", ""), None)
+        logger.debug(f"Sending message to {event_name.replace('event_', '')} {channel} channel")
+        await send_block_to_channel(
+            blocks=blocks, channel=channel
+        )
+        logger.debug(f"Message sent to {event_name.replace("event_", "")} {channel} channel")
+        return {
+            "response": f"Awesome, we're working on this now! We will call you shortly to discuss your needs.",
+            "status_code": 200,
+        }
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return {"status_code": 500, "response": f" {e}"}
 
 async def execute_hiring_intent(query: str, previous_messages: list):
     try:
@@ -473,9 +508,6 @@ async def execute_hiring_intent(query: str, previous_messages: list):
         traceback.print_exc()
         return {"status_code": 500, "response": f"Error while executing booking intent: {e}"}
 
-async def execute_warranty_intent(query: str, previous_messages: list):
-    pass
-
 
 async def process_botpress_query_service(query: str, conversation_id: str):
     logger.debug("Inside Process Botpress Query controller")
@@ -510,7 +542,8 @@ async def process_botpress_query_service(query: str, conversation_id: str):
         if response["status_code"] != 200:
             return response
 
-
+        print(response["response"])
+        
         if "booking_confirm" in response["response"]:
             response = await execute_booking_intent(query, previous_messages)
             return response
@@ -519,6 +552,14 @@ async def process_botpress_query_service(query: str, conversation_id: str):
             response = await execute_hiring_intent(query, previous_messages)
             return response
         
+        event_list = [
+            "event_change_orders", "event_new_lead", "event_permit", "event_inspection", "event_collection", "event_dispatching"
+        ]
+        for event in event_list:
+            if event in response["response"]:
+                response = await execute_intent(query, previous_messages, event)
+                return response
+                
 
         return {
             "response": response["response"],

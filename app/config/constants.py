@@ -64,11 +64,15 @@ dangerous_patterns = [
     r"document\.location",  # Common JavaScript-based attacks
 ]
 
+# Slack Channel Dictionary
 SLACK_CHANNEL_DICT = {
-    "new_leads": "C06HF7G0PQT",
-    "dispatching": "C070C3FEQJ1",
-    "collections": "C07QLFVK6D6",
-    "human-resources": "C07V5BTT8UC",
+    "new_lead": "C06HF7G0PQT", #done
+    "dispatching": "C070C3FEQJ1", #done
+    "permit": "C073V2Q500M", #done
+    "inspection": "C073V2Q500M", #done
+    "human-resources": "C07V5BTT8UC", #done
+    "collection": "C07QLFVK6D6", #done
+    "change_orders": "C08381PAWP3", #done
     "dev-team": "C080R3ALW3V",
     "customer-ai-agent-testing": "C083RC1MB09"
 }

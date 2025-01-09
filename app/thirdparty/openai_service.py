@@ -173,7 +173,7 @@ class OpenAIService:
                                 "start": "2022-01-01T00:00:00Z"
                             }
                             Ensure:
-                            1. If any field is missing, use an empty string "" for that field.
+                            1. If any field is missing, use an empty string "" for that field value.
                             """
 
             response = await self.get_gpt_response_with_history(
@@ -197,7 +197,7 @@ class OpenAIService:
                                 "address": "123, Street Name, City, Country"
                             }
                             Ensure:
-                            1. If any field is missing, use an empty string "" for that field.
+                            1. If any field is missing, use an empty string "" for that field value.
                             """
 
             response = await self.get_gpt_response_with_history(
