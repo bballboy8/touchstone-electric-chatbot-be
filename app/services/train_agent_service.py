@@ -443,11 +443,11 @@ async def execute_intent(query: str, previous_messages: list, event_name: str):
             ]
 
         channel = constants.SLACK_CHANNEL_DICT.get(event_name.replace("event_", ""), None)
-        print(f"Sending message to {event_name.replace('event_', '')} {channel} channel")
+        # print(f"Sending message to {event_name.replace('event_', '')} {channel} channel")
         await send_block_to_channel(
             blocks=blocks, channel=channel
         )
-        print(f"Message sent to {event_name.replace("event_", "")} {channel} channel")
+        # print(f"Message sent to {event_name.replace("event_", "")} {channel} channel")
         return {
             "response": f"Awesome, we're working on this now! We will call you shortly to discuss your needs.",
             "status_code": 200,
