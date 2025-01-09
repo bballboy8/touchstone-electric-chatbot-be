@@ -27,7 +27,7 @@ class SlackServiceAPI:
     
     async def get_slack_channels(self, cursor):
         response = self.slack_client.conversations_list(
-            types="private_channel", cursor=cursor
+            types="private_channel,public_channel", cursor=cursor
         )
         return response
 

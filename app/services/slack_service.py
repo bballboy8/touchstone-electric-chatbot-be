@@ -52,6 +52,7 @@ async def get_slack_channel_list(cursor: str = None):
     try:
         slack_instance = SlackServiceAPI()
         response = await slack_instance.get_slack_channels(cursor)
+        print(response)
         response_list = [{"id": channel["id"], "name": channel["name"]} for channel in response["channels"]]
         return {"status": "ok", "data": response_list}
     except Exception as e:
