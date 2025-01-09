@@ -232,7 +232,7 @@ class ServiceTitanApiService:
             }
             data = booking_data.model_dump()
             data["externalId"] = str(uuid.uuid4())
-            data["summary"] = conversation_summary
+            data["summary"] = conversation_summary if conversation_summary else "Booking Request"
 
             response = await self.send_request_async(url, headers, data)
             if response.status_code != 200:
