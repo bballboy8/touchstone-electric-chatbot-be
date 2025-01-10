@@ -3,6 +3,7 @@ from openai import OpenAI
 from logging_module import logger
 import os
 from fastapi import UploadFile, File
+from datetime import datetime
 
 
 class OpenAIService:
@@ -220,6 +221,12 @@ class OpenAIService:
 
             system_prompt = system_prompt.get("system_prompt")
 
+            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+            system_prompt += f"""
+                Current Time : {current_time}
+            """
+            
             response = await self.get_gpt_response_with_history(
                 prompt=query,
                 system_prompt=system_prompt,
