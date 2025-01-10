@@ -164,7 +164,8 @@ class OpenAIService:
     async def extract_user_details(self, user_query: str, previous_messages: list):
         try:
             system_prompt = """ 
-                            Extract the user's details (name, email, phone number, address, visit date and time) from the given query and messages. 
+                            Extract the user's details (name, email, phone number, address, visit date and time in UTC) from the given query and messages. 
+                            Make sure you adjust the users date and time to UTC they will all be in EST Timezone.
                             Return only valid JSON in the following RFC8259-compliant format, and do not include any extra text or explanations outside the JSON object:
                             {
                                 "name": "John Doe",
