@@ -387,6 +387,13 @@ async def execute_booking_intent(query: str, previous_messages: list):
                     "type": "mrkdwn",
                     "text": f"*Summary:*\n• *Appointment Date:* {booking_data['start']}\n• *Appointment Details:* {summary}"
                 }
+                },
+                {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f""" *Marketing Source*: Website"""
+                }
                 }
             ]
         await send_block_to_channel(
@@ -438,6 +445,13 @@ async def execute_intent(query: str, previous_messages: list, event_name: str):
                 "text": {
                     "type": "mrkdwn",
                     "text": f""" *Conversation Summary*: {summary}"""
+                }
+                },
+                {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f""" *Marketing Source*: Website"""
                 }
                 }
             ]
@@ -492,6 +506,13 @@ async def execute_hiring_intent(query: str, previous_messages: list):
                 "text": {
                     "type": "mrkdwn",
                     "text": f""" *Conversation Summary*: {summary}"""
+                }
+                },
+                {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f""" *Marketing Source*: Website"""
                 }
                 }
             ]
