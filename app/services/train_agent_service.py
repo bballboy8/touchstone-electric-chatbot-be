@@ -33,6 +33,26 @@ async def extract_useful_pages(pdf_path, min_words=20, skip_keywords=None):
             "status_code": 500,
             "response": f"Error while extracting useful pages: {e}",
         }
+    
+def format_receptionist_time(iso_time: str) -> str:
+    """
+    Convert an ISO 8601 UTC time string to a receptionist-readable format.
+    
+    Args:
+        iso_time (str): The ISO 8601 formatted time string (e.g., 2025-01-12T13:32:00Z).
+    Returns:
+        str: The formatted time string (e.g., 'Sunday, January 12, 2025 at 1:32 PM').
+    """
+    try:
+        # Parse the ISO 8601 string into a datetime object
+        dt = datetime.strptime(iso_time, "%Y-%m-%dT%H:%M:%SZ")
+        
+        # Format into a receptionist-readable string
+        return dt.strftime("%A, %B %d, %Y at %-I:%M %p") 
+    except Exception as e:
+        logger.error(f"Error formatting time: {e}")
+        # extract the date if possible
+        return iso_time.split("T")[0]
 
 
 async def chunk_text(text, max_tokens=900):
@@ -311,7 +331,9 @@ async def get_user_conversation_from_botpress(conversation_id: str):
 
         response = requests.get(url, headers=headers)
         response.raise_for_status()
-        data = convert_to_openai_messages(response.json())
+        json_data = response.json()
+        print(json_data, "JSON DATA")
+        data = convert_to_openai_messages(json_data)
         return {
             "status_code": 200,
             "response": data,
@@ -340,7 +362,7 @@ def convert_to_openai_messages(data):
             role = "assistant" if message.get("direction") == "outgoing" else "user"
             content = message.get("payload", {}).get("text", "")
             if content:  # Only add messages with non-empty content
-                openai_messages.append({"role": role, "content": content})
+                openai_messages.append({"role": role, "content": content, "timestamp": message.get("createdAt")})
 
         return openai_messages
     except Exception as e:
@@ -385,7 +407,7 @@ async def execute_booking_intent(query: str, previous_messages: list):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"*Summary:*\n• *Appointment Date:* {booking_data['start']}\n• *Appointment Details:* {summary}"
+                    "text": f"*Summary:*\n• *Appointment Date:* {format_receptionist_time(booking_data['start'])}\n• *Appointment Details:* {summary}"
                 }
                 },
                 {
@@ -546,7 +568,7 @@ async def process_botpress_query_service(query: str, conversation_id: str):
             return conversation_response
 
         previous_messages = conversation_response["response"][::-1]
-
+        print(previous_messages, "Previous Messages")
         pinecone_client = PineConeDBService()
         openai_client = OpenAIService()
 

@@ -199,15 +199,6 @@ class ServiceTitanApiService:
         except Exception as e:
             return {"status_code": 500, "data": f"Internal server error: {e}"}
         
-    @retry(wait=wait_fixed(2), stop=stop_after_attempt(3))
-    async def send_request_async(self, url, headers, data):
-        async with httpx.AsyncClient() as client:
-            try:
-                response = await client.post(url, headers=headers, json=data)
-                response.raise_for_status() 
-                return response
-            except httpx.RequestError as e:
-                logger.error(f"Request failed: {e}")
 
     async def create_booking(self, booking_data: ServiceTitanBookingRequest, conversation_summary: str = None):
         try:
@@ -234,7 +225,8 @@ class ServiceTitanApiService:
             data["externalId"] = str(uuid.uuid4())
             data["summary"] = conversation_summary if conversation_summary else "Booking Request"
 
-            response = await self.send_request_async(url, headers, data)
+            print(data)
+            response = requests.post(url, headers=headers, json=data)
             if response.status_code != 200:
                 return {
                     "status_code": response.status_code,
