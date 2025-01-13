@@ -1,3 +1,4 @@
+import pytz
 import pdfplumber
 from nltk.tokenize import sent_tokenize
 import os
@@ -36,22 +37,26 @@ async def extract_useful_pages(pdf_path, min_words=20, skip_keywords=None):
     
 def format_receptionist_time(iso_time: str) -> str:
     """
-    Convert an ISO 8601 UTC time string to a receptionist-readable format.
-    
+    Convert an ISO 8601 UTC time string to a receptionist-readable format in EST.
+
     Args:
         iso_time (str): The ISO 8601 formatted time string (e.g., 2025-01-12T13:32:00Z).
     Returns:
-        str: The formatted time string (e.g., 'Sunday, January 12, 2025 at 1:32 PM').
+        str: The formatted time string in EST (e.g., 'Sunday, January 12, 2025 at 8:32 AM').
     """
     try:
-        # Parse the ISO 8601 string into a datetime object
-        dt = datetime.strptime(iso_time, "%Y-%m-%dT%H:%M:%SZ")
+        # Parse the ISO 8601 string into a UTC datetime object
+        utc_time = datetime.strptime(iso_time, "%Y-%m-%dT%H:%M:%SZ")
+        utc_time = utc_time.replace(tzinfo=pytz.utc)
+        
+        # Convert UTC time to EST
+        est_time = utc_time.astimezone(pytz.timezone("US/Eastern"))
         
         # Format into a receptionist-readable string
-        return dt.strftime("%A, %B %d, %Y at %-I:%M %p") 
+        return est_time.strftime("%A, %B %d, %Y at %-I:%M %p")
     except Exception as e:
         logger.error(f"Error formatting time: {e}")
-        # extract the date if possible
+        # Extract the date if possible
         return iso_time.split("T")[0]
 
 
