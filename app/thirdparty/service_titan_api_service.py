@@ -223,9 +223,9 @@ class ServiceTitanApiService:
             }
             data = booking_data.model_dump()
             data["externalId"] = str(uuid.uuid4())
-            data["summary"] = conversation_summary if conversation_summary else "Booking Request"
+            data["summary"] = conversation_summary if conversation_summary else "Booking Request"         
 
-            print(data)
+            print(data, "service titand booking request")
             response = requests.post(url, headers=headers, json=data)
             if response.status_code != 200:
                 return {
