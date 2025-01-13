@@ -174,9 +174,23 @@ async def detect_booking_intent(user_query: str, previous_messages: list):
         traceback.print_exc()
         logger.error(f"Error detecting booking intent: {e}")
         return False
+    
+import re
+
+def extract_json(response):
+    try:
+        match = re.search(r'\{.*\}', response, re.DOTALL)
+        if match:
+            json_data = match.group()
+            return json.loads(json_data)
+        else:
+            raise ValueError("No valid JSON found in the response")
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Error decoding JSON: {e}")
 
 
 async def extract_booking_data(user_query: str, previous_messages: list = None):
+    final_response = ""
     try:
         openai_service = OpenAIService()
         response = await openai_service.extract_user_details(user_query, previous_messages)
@@ -184,8 +198,9 @@ async def extract_booking_data(user_query: str, previous_messages: list = None):
             return response
 
         details = response["response"].replace("```json", "").replace("```", "").strip()
+        final_response = details
         logger.debug(f"Extracted user details: {details}")
-        json_data = json.loads(details)
+        json_data = extract_json(details)
         logger.debug(f"Extracted user details in json format: {json_data}")
         contacts = []
         if "email" in json_data and json_data["email"]:
@@ -211,7 +226,7 @@ async def extract_booking_data(user_query: str, previous_messages: list = None):
         import traceback
         traceback.print_exc()
         logger.error(f"Error extracting booking data: {e}")
-        return {"message": "An error occurred while extracting booking data.", "error": str(e), "status_code": 500}
+        return {"message": "An error occurred while extracting booking data.", "error": str(e), "status_code": 500, "response": f"Forward this on our contact number: {final_response}"}
 
 async def handle_booking_request(user_query: str, conversation_summary: str = None, previous_messages: list = None):
     try:
