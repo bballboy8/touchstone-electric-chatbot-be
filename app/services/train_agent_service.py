@@ -395,7 +395,7 @@ async def execute_booking_intent(query: str, previous_messages: list):
     try:
         openai_client = OpenAIService()
 
-        conversation_summary = await openai_client.get_conversation_summary(
+        conversation_summary = await openai_client.get_conversation_bullets(
                     previous_messages
                 )
         summary = conversation_summary["response"]

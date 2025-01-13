@@ -317,6 +317,21 @@ class OpenAIService:
                 "status_code": 500,
             }
         
+    async def get_conversation_bullets(self, conversation: list):
+        try:
+            system_prompt = """ 
+                            Return reason for visit. You only need to respond with conversation reason. What was the end thing user was trying to talk on. Keep it very concise.
+                            """
+            response = await self.get_gpt_response_with_history(
+                prompt="Generate concise Summary", system_prompt=system_prompt, previous_messages=conversation
+            )
+            return response
+        except Exception as e:
+            return {
+                "message": f"An error occurred while generating conversation summary: {e}",
+                "status_code": 500,
+            }
+        
     async def get_general_conversation_summary(self, conversation: list):
         try:
             system_prompt = """ 
