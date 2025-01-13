@@ -4,7 +4,23 @@ from logging_module import logger
 import os
 from fastapi import UploadFile, File
 from datetime import datetime
+import pytz
 
+def convert_to_est(epoch_time):
+    """
+    Convert a given epoch time (time.time()) to a formatted string in EST.
+
+    Args:
+        epoch_time (float): Epoch time (e.g., from time.time()).
+
+    Returns:
+        str: Formatted date-time string in EST timezone.
+    """
+    utc_time = datetime.fromtimestamp(epoch_time, pytz.utc)
+    
+    est_timezone = pytz.timezone("US/Eastern")
+    est_time = utc_time.astimezone(est_timezone)
+    return est_time.strftime("%Y-%m-%d %H:%M:%S")
 
 class OpenAIService:
     def __init__(self):
@@ -222,7 +238,7 @@ class OpenAIService:
 
             system_prompt = system_prompt.get("system_prompt")
 
-            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            current_time = convert_to_est(datetime.now().timestamp())
 
             system_prompt += f"""
                 Current Time : {current_time}
