@@ -323,7 +323,7 @@ class OpenAIService:
                             Based on provided context return the reason of conversation. Keep it very concise. No need to include time and date. Just a simple text of what is the reason.
                             """
             response = await self.get_gpt_response_with_history(
-                prompt="Generate concise Summary", system_prompt=system_prompt, previous_messages=conversation
+                prompt="As per the users conversation with bot what fix he is looking for, answer in one line", system_prompt=system_prompt, previous_messages=conversation
             )
             return response
         except Exception as e:
