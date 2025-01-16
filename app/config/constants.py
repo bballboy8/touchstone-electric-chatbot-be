@@ -75,3 +75,7 @@ SLACK_CHANNEL_DICT = {
     "dev-team": "C080R3ALW3V",
     "customer-ai-agent-testing": "C083RC1MB09"
 }
+
+# Notion
+NOTION_API_TOKEN=os.getenv("NOTION_API_TOKEN")
+NOTION_TEAM_CONTACT_PAGE_DATABASE_ID=os.getenv("NOTION_TEAM_CONTACT_PAGE_DATABASE_ID")
