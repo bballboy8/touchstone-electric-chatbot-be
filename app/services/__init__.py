@@ -12,3 +12,4 @@ from .service_titan_service import *
 from .slack_service import *
 from .vonage_service import *
 from .notion_service import *
+from .email_agent_service import *

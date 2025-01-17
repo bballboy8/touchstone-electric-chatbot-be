@@ -47,6 +47,8 @@ jobs:
             --build-arg VONAGE_API_SECRET=${{ secrets.VONAGE_API_SECRET }} \
             --build-arg VONAGE_FROM_NUMBER=${{ secrets.VONAGE_FROM_NUMBER }} \
             --build-arg VONAGE_APPLICATION_ID=${{ secrets.VONAGE_APPLICATION_ID }} \
+            --build-arg NOTION_API_TOKEN=${{ secrets.NOTION_API_TOKEN }} \
+            --build-arg NOTION_TEAM_CONTACT_PAGE_DATABASE_ID=${{ secrets.NOTION_TEAM_CONTACT_PAGE_DATABASE_ID }} \
             -t $IMAGE .
           docker push $IMAGE
 
