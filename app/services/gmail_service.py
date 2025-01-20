@@ -15,3 +15,15 @@ async def get_unread_emails_service():
         traceback.print_exc()
         logger.error(f"Exception in Get Unread Emails Service: {str(e)}")
         return {"response": "Internal Server Error", "status_code": 500}
+    
+async def get_unread_emails_with_threads():
+    logger.debug("Inside Get Unread Emails with Threads Service")
+    try:
+        gmail_client = GmailAPIService()
+        response = await gmail_client.get_unread_emails_with_threads()
+        print(response)
+        return {"response": "Unread Emails Fetched Successfully", "status_code": 200}
+    except Exception as e:
+        traceback.print_exc()
+        logger.error(f"Exception in Get Unread Emails with Threads Service: {str(e)}")
+        return {"response": "Internal Server Error", "status_code": 500}

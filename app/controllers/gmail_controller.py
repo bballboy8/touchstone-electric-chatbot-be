@@ -14,3 +14,12 @@ async def get_unread_emails():
     response = await services.get_unread_emails_service()
     logger.debug("Response from Get Unread Emails controller")
     return JSONResponse(content=response, status_code=200)
+
+@router.post(
+    "/get-unread-emails-with-threads"
+)
+async def get_unread_emails_with_threads():
+    logger.debug("Inside Get Unread Emails with Threads controller")
+    response = await services.get_unread_emails_with_threads()
+    logger.debug("Response from Get Unread Emails with Threads controller")
+    return JSONResponse(content=response, status_code=200)
