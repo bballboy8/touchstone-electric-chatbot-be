@@ -10,9 +10,14 @@ router = APIRouter()
 @router.get(
     "/get-employees",
 )
-async def get_service_titan_employees(page: int = 1, page_size: int = 10, user_id = Depends(get_current_user_id)):
+async def get_service_titan_employees(
+    page: int = 1,
+    page_size: int = 10,
+    phone_number: str = None,
+    user_id=Depends(get_current_user_id),
+):
     logger.debug("Inside Service Titan employees controller")
-    response = await services.get_service_titan_employees(page, page_size)
+    response = await services.get_service_titan_employees(page, page_size, phone_number)
     logger.debug("Response from Service Titan employees controller")
     return response
 
@@ -20,9 +25,14 @@ async def get_service_titan_employees(page: int = 1, page_size: int = 10, user_i
 @router.get(
     "/get-customers",
 )
-async def get_service_titan_customers(page: int = 1, page_size: int = 10, user_id = Depends(get_current_user_id)):
+async def get_service_titan_customers(
+    page: int = 1,
+    page_size: int = 10,
+    phone_number: str = None,
+    user_id=Depends(get_current_user_id),
+):
     logger.debug("Inside Service Titan customers controller")
-    response = await services.get_service_titan_customers(page, page_size)
+    response = await services.get_service_titan_customers(page, page_size, phone_number)
     logger.debug("Response from Service Titan customers controller")
     return response
 
