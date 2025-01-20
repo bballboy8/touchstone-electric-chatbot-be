@@ -18,3 +18,14 @@ class NotionApiClient:
             traceback.print_exc()
             logger.error(f"Error in get_team_contact_list: {e}")
             return {"status_code": 500, "data": f"Error in get_team_contact_list: {e}"}
+        
+    async def notion_health_check(self):
+        try:
+            self.notion.databases.query(
+                database_id=constants.NOTION_TEAM_CONTACT_PAGE_DATABASE_ID
+            )
+            return {"status_code": 200, "data": "Notion API is working correctly."}
+        except Exception as e:
+            traceback.print_exc()
+            logger.error(f"Error in notion_health_check: {e}")
+            return {"status_code": 500, "data": f"Error in notion_health_check: {e}"}
