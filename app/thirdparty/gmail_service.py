@@ -4,6 +4,7 @@ from googleapiclient.discovery import build
 import os
 import base64
 from email.mime.text import MIMEText
+from google.auth.transport.requests import Request
 
 SCOPES = [
     "https://www.googleapis.com/auth/gmail.readonly",
@@ -19,18 +20,27 @@ class GmailAPIService:
     def authenticate_gmail(self):
         """Authenticate and return Gmail API service credentials."""
         creds = None
-        if os.path.exists("./app/config/token.json"):
-            creds = Credentials.from_authorized_user_file(
-                "./app/config/token.json", SCOPES
-            )
+        token_path = "./app/config/token.json"
+        credentials_path = "./app/config/credentials.json"
+
+        # Check for existing token.json file
+        if os.path.exists(token_path):
+            creds = Credentials.from_authorized_user_file(token_path, SCOPES)
+        
+        # Refresh or re-authenticate if credentials are not valid
         if not creds or not creds.valid:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                "./app/config/credentials.json", SCOPES
-            )
-            creds = flow.run_local_server(port=0)
-            with open("./app/config/token.json", "w") as token_file:
-                token_file.write(creds.to_json())
+            if creds and creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+            else:
+                flow = InstalledAppFlow.from_client_secrets_file(credentials_path, SCOPES)
+                creds = flow.run_local_server(port=0)
+
+        # Save the credentials with refresh_token to token.json
+        with open(token_path, "w") as token_file:
+            token_file.write(creds.to_json())
+    
         return creds
+
 
     async def get_unread_emails(self):
         """Fetch unread messages and send dummy replies."""
@@ -87,3 +97,10 @@ class GmailAPIService:
             userId="me", body={"raw": raw_message}
         ).execute()
         return {"response": "Reply sent successfully", "status_code": 200}
+
+    async def gmail_health_check(self):
+        try:
+            self.service.users().getProfile(userId="me").execute()
+            return {"status_code": 200, "data": "Gmail API is working correctly."}
+        except Exception as e:
+            return {"status_code": 500, "data": f"Error in gmail_health_check: {e}"}

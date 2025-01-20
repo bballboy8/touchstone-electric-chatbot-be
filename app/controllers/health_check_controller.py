@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 import services
 from logging_module import logger
 from utils.dependencies import get_current_user_id
-
+from fastapi.responses import JSONResponse
 router = APIRouter()
 
 
@@ -42,3 +42,29 @@ async def service_titan_api_health_check(user_id: int = Depends(get_current_user
     logger.debug("Response from Service Titan API health check controller")
     return response
 
+@router.get(
+    "/database",
+)
+async def database_health_check(user_id: int = Depends(get_current_user_id)):
+    logger.debug("Inside Database health check controller")
+    response = await services.test_database_service()
+    logger.debug("Response from Database health check controller")
+    return JSONResponse(content=response, status_code=response["status_code"])
+
+@router.get(
+    "/notion-api",
+)
+async def notion_api_health_check(user_id: int = Depends(get_current_user_id)):
+    logger.debug("Inside Notion API health check controller")
+    response = await services.notion_health_check_service()
+    logger.debug("Response from Notion API health check controller")
+    return JSONResponse(content=response, status_code=response["status_code"])
+
+@router.get(
+    "/gmail-api",
+)
+async def gmail_api_health_check(user_id: int = Depends(get_current_user_id)):
+    logger.debug("Inside Gmail API health check controller")
+    response = await services.gmail_health_check_service()
+    logger.debug("Response from Gmail API health check controller")
+    return JSONResponse(content=response, status_code=response["status_code"])

@@ -1,5 +1,6 @@
 from logging_module import logger
 import traceback
+from db_connection import db
 
 async def process_email_agent_query_service(query: str):
     logger.debug("Inside Process Email Agent Query Service")
