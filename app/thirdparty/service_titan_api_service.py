@@ -291,3 +291,74 @@ class ServiceTitanApiService:
             return {"status_code": 200, "data": response.json()}
         except Exception as e:
             return {"status_code": 500, "data": f"Internal server error: {e}"}
+        
+    async def get_customer_contacts_by_customer_id(self, customer_id):
+        try:
+            response = await self._get_access_token()
+            if response["status_code"] != 200:
+                return response
+            access_token = response["data"]["access_token"]
+            url = f"{self.api_url}/crm/v2/tenant/{self.tenant_id}/customers/{customer_id}/contacts"
+            headers = {
+                "Authorization": access_token,
+                "ST-App-Key": self.app_key,
+            }
+            response = requests.get(url, headers=headers)
+            if response.status_code != 200:
+                return {
+                    "status_code": response.status_code,
+                    "data": json.loads(response.text),
+                }
+            response.raise_for_status()
+            return {"status_code": 200, "data": response.json()}
+        except Exception as e:
+            return {"status_code": 500, "data": f"Internal server error: {e}"}
+        
+    async def export_all_customers_data(self, continueFrom: str = None):
+        try:
+            response = await self._get_access_token()
+            if response["status_code"] != 200:
+                return response
+            access_token = response["data"]["access_token"]
+            url = f"{self.api_url}/crm/v2/tenant/{self.tenant_id}/export/customers"
+            if continueFrom:
+                url += f"?from={continueFrom}"
+            headers = {
+                "Authorization": access_token,
+                "ST-App-Key": self.app_key,
+            }
+            response = requests.get(url, headers=headers)
+            if response.status_code != 200:
+                return {
+                    "status_code": response.status_code,
+                    "data": json.loads(response.text),
+                }
+            response.raise_for_status()
+            return {"status_code": 200, "data": response.json()}
+        except Exception as e:
+            return {"status_code": 500, "data": f"Internal server error: {e}"}
+        
+    async def export_all_customers_contacts(self, continueFrom: str = None):
+        try:
+            response = await self._get_access_token()
+            if response["status_code"] != 200:
+                return response
+            access_token = response["data"]["access_token"]
+            url = f"{self.api_url}/crm/v2/tenant/{self.tenant_id}/export/customers/contacts"
+            if continueFrom:
+                url += f"?from={continueFrom}"
+            headers = {
+                "Authorization": access_token,
+                "ST-App-Key": self.app_key,
+            }
+            response = requests.get(url, headers=headers)
+            if response.status_code != 200:
+                return {
+                    "status_code": response.status_code,
+                    "data": json.loads(response.text),
+                }
+            response.raise_for_status()
+            return {"status_code": 200, "data": response.json()}
+        except Exception as e:
+            return {"status_code": 500, "data": f"Internal server error: {e}"}
+            

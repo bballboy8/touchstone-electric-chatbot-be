@@ -102,3 +102,26 @@ async def create_service_titan_booking(booking_data: ServiceTitanBookingRequest,
     response = await services.create_booking_request(booking_data)
     logger.debug("Response from Service Titan create booking controller")
     return response
+
+
+@router.get(
+    "/get-customer-contacts",
+)
+async def get_service_titan_customer_contacts(
+    customer_id: str,
+    user_id = Depends(get_current_user_id),
+):
+    logger.debug("Inside Service Titan customer contacts controller")
+    response = await services.get_customer_contacts_by_customer_id(customer_id)
+    logger.debug("Response from Service Titan customer contacts controller")
+    return response
+
+
+@router.get(
+    "/export-all-customers-data"
+)
+async def export_all_customers_data(user_id = Depends(get_current_user_id)):
+    logger.debug("Inside export all customers data controller")
+    response = await services.export_all_customers_data_from_service_titan()
+    logger.debug("Response from export all customers data controller")
+    return response

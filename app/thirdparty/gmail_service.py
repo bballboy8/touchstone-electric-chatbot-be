@@ -54,13 +54,13 @@ class GmailAPIService:
             .messages()
             .list(
                 userId="me",
-                q="is:unread",
+                q="",
                 maxResults=5,
             )
             .execute()
         )
         messages = results.get("messages", [])
-
+        print(messages)
         if not messages:
             return {"response": "No new messages found.", "status_code": 200}
 
@@ -88,6 +88,66 @@ class GmailAPIService:
             # send_reply(service, from_email, subject)
 
         return {"response": "Unread Emails Fetched Successfully", "status_code": 200}
+    
+    async def get_unread_emails_with_threads(self):
+        """Fetch unread messages grouped by threads and return in OpenAI-friendly format."""
+        results = (
+            self.service.users()
+            .messages()
+            .list(
+                userId="me",
+                maxResults=10,
+            )
+            .execute()
+        )
+        messages = results.get("messages", [])
+        if not messages:
+            return {"response": "No new messages found.", "status_code": 200}
+
+        # Dictionary to group messages by threadId
+        threads = {}
+
+        for message in messages:
+            # Fetch the email details
+            msg = (
+                self.service.users()
+                .messages()
+                .get(userId="me", id=message["id"])
+                .execute()
+            )
+            headers = msg["payload"]["headers"]
+            subject = next(
+                header["value"] for header in headers if header["name"] == "Subject"
+            )
+            from_email = next(
+                header["value"] for header in headers if header["name"] == "From"
+            )
+            from_email = from_email.split("<")[-1].strip(">")
+            thread_id = msg.get("threadId")
+
+            # Initialize thread if not already created
+            if thread_id not in threads:
+                threads[thread_id] = []
+
+            # Add the email to the thread
+            threads[thread_id].append({
+                "user": from_email,
+                "message": f"Subject: {subject}",
+                "date": next(
+                    (header["value"] for header in headers if header["name"] == "Date"), "Unknown"
+                )
+            })
+
+        # Convert threads to a list format for the response
+        formatted_threads = []
+        for thread_id, emails in threads.items():
+            formatted_threads.append({
+                "thread_id": thread_id,
+                "history": sorted(emails, key=lambda x: x["date"])  # Sort by date for chronological order
+            })
+
+        return {"response": formatted_threads, "status_code": 200}
+
 
     async def send_reply(self, to_email, subject):
         reply_text = "This is an automated reply. Thank you for reaching out!"
