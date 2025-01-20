@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from routers import (
+    email_agent_router,
     user_router,
     health_check_router,
     pinecone_router,
@@ -11,7 +12,8 @@ from routers import (
     service_titan_router,
     slack_router,
     vonage_router,
-    notion_router
+    notion_router,
+    gmail_router
 )
 import services
 
@@ -46,6 +48,8 @@ async def health_check():
 
 
 # Include routers
+project.include_router(gmail_router.router, prefix="/api", tags=["Gmail"])
+project.include_router(email_agent_router.router, prefix="/api", tags=["Email Agent"])
 project.include_router(user_router.router, prefix="/api", tags=["User"])
 project.include_router(health_check_router.router, prefix="/api", tags=["Health Check"])
 project.include_router(pinecone_router.router, prefix="/api", tags=["Pinecone"])

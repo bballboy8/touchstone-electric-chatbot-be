@@ -4,12 +4,12 @@ from models.service_titan import ServiceTitanCustomer, ServiceTitanBookingReques
 
 
 async def get_service_titan_employees(
-    page: int = 1, page_size: int = 10
+    page: int = 1, page_size: int = 10, phone_number: str = None
 ):
     logger.info("Getting Service Titan employees")
     try:
         service_titan_api_service = ServiceTitanApiService()
-        response = await service_titan_api_service.get_employees(page, page_size)
+        response = await service_titan_api_service.get_employees(page, page_size, phone_number)
         logger.info("Service Titan employees received")
         if response["status_code"] != 200:
             return response
@@ -20,12 +20,13 @@ async def get_service_titan_employees(
 
 
 async def get_service_titan_customers(
-    page: int = 1, page_size: int = 10
+    page: int = 1, page_size: int = 10, phone_number: str = None, 
 ):
     logger.info("Getting Service Titan customers")
     try:
         service_titan_api_service = ServiceTitanApiService()
-        response = await service_titan_api_service.get_customers(page, page_size)
+        response = await service_titan_api_service.get_customers(page, page_size, phone_number)
+        print(response)
         logger.info("Service Titan customers received")
         if response["status_code"] != 200:
             return response

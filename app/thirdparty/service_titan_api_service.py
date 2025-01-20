@@ -34,13 +34,17 @@ class ServiceTitanApiService:
         except Exception as e:
             return {"status_code": 500, "data": f"Internal server error:{e}"}
 
-    async def get_employees(self, page: int, page_size: int):
+    async def get_employees(self, page: int, page_size: int, phone_number: str = None):
         try:
             response = await self._get_access_token()
             if response["status_code"] != 200:
                 return response
             access_token = response["data"]["access_token"]
             url = f"{self.api_url}/settings/v2/tenant/{self.tenant_id}/employees?Page={page}&PageSize={page_size}"
+
+            if phone_number:
+                url += f"&phone={phone_number}"
+
             headers = {
                 "Authorization": access_token,
                 "ST-App-Key": self.app_key,
@@ -51,13 +55,17 @@ class ServiceTitanApiService:
         except Exception as e:
             return {"status_code": 500, "data": f"Internal server error: {e}"}
 
-    async def get_customers(self, page: int, page_size: int):
+    async def get_customers(self, page: int, page_size: int, phone_number: str = None):
         try:
             response = await self._get_access_token()
             if response["status_code"] != 200:
                 return response
             access_token = response["data"]["access_token"]
             url = f"{self.api_url}/crm/v2/tenant/{self.tenant_id}/customers?Page={page}&PageSize={page_size}"
+
+            if phone_number:
+                url += f"&phone={phone_number}"
+                
             headers = {
                 "Authorization": access_token,
                 "ST-App-Key": self.app_key,
