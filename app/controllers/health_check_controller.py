@@ -68,3 +68,12 @@ async def gmail_api_health_check(user_id: int = Depends(get_current_user_id)):
     response = await services.gmail_health_check_service()
     logger.debug("Response from Gmail API health check controller")
     return JSONResponse(content=response, status_code=response["status_code"])
+
+@router.get(
+    "/all-services",
+)
+async def all_services_health_check(user_id: int = Depends(get_current_user_id)):
+    logger.debug("Inside All Services health check controller")
+    response = await services.test_all_services()
+    logger.debug("Response from All Services health check controller")
+    return response

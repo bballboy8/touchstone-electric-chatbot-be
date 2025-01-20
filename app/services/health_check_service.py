@@ -19,8 +19,7 @@ async def test_openai_chat_completion_service():
         if response["status_code"] != 200:
             return response
         return {
-            "message": "OpenAI service is working correctly.",
-            "response": response["message"],
+            "response": "OpenAI service is working correctly.",
             "status_code": 200,
         }
     except Exception as e:
@@ -43,14 +42,13 @@ async def test_openai_for_text_embeddings_service():
         if response["status_code"] != 200:
             return response
         return {
-            "message": "OpenAI service is working correctly for generating embeddings.",
-            "response": response,
+            "response": "OpenAI service is working correctly for generating embeddings.",
             "status_code": 200,
         }
     except Exception as e:
         logger.error(f"An error occurred while testing the OpenAI service: {e}")
         return {
-            "message": f"An error occurred while testing the OpenAI service: {e}",
+            "response": f"An error occurred while testing the OpenAI service: {e}",
             "status_code": 500,
         }
 
@@ -67,14 +65,13 @@ async def test_pinconedb_service():
         if response["status_code"] != 200:
             return response
         return {
-            "message": "PineconeDB service is working correctly.",
-            "response": response,
+            "response": "PineconeDB service is working correctly.",
             "status_code": 200,
         }
     except Exception as e:
         logger.error(f"An error occurred while testing the PineconeDB service: {e}")
         return {
-            "message": f"An error occurred while testing the PineconeDB service: {e}",
+            "response": f"An error occurred while testing the PineconeDB service: {e}",
             "status_code": 500,
         }
 
@@ -91,14 +88,13 @@ async def test_service_titan_api_service():
             return response
         return {
 
-            "message": "Service Titan API service is working correctly.",
-            "response": response,
+            "response": "Service Titan API service is working correctly.",
             "status_code": 200,
         }
     except Exception as e:
         logger.error(f"An error occurred while testing the Service Titan API service: {e}")
         return {
-            "message": f"An error occurred while testing the Service Titan API service: {e}",
+            "response": f"An error occurred while testing the Service Titan API service: {e}",
             "status_code": 500,
         }
     
@@ -133,7 +129,7 @@ async def notion_health_check_service():
     except Exception as e:
         logger.error(f"An error occurred while testing the Notion API service: {e}")
         return {
-            "message": f"An error occurred while testing the Notion API service: {e}",
+            "response": f"An error occurred while testing the Notion API service: {e}",
             "status_code": 500,
         }
     
@@ -155,6 +151,30 @@ async def gmail_health_check_service():
     except Exception as e:
         logger.error(f"An error occurred while testing the Gmail API service: {e}")
         return {
-            "message": f"An error occurred while testing the Gmail API service: {e}",
+            "response": f"An error occurred while testing the Gmail API service: {e}",
+            "status_code": 500,
+        }
+    
+async def test_all_services():
+    """
+    Test all the services.
+
+    Returns:
+    """
+    try:
+        response = {
+            "openai_chat_completion": await test_openai_chat_completion_service(),
+            "openai_text_embeddings": await test_openai_for_text_embeddings_service(),
+            "pineconedb": await test_pinconedb_service(),
+            "service_titan_api": await test_service_titan_api_service(),
+            "database": await test_database_service(),
+            "notion_api": await notion_health_check_service(),
+            "gmail_api": await gmail_health_check_service(),
+        }
+        return response
+    except Exception as e:
+        logger.error(f"An error occurred while testing all services: {e}")
+        return {
+            "response": f"An error occurred while testing all services: {e}",
             "status_code": 500,
         }
