@@ -9,7 +9,7 @@ class VonageApi:
         self.vonage_client = Vonage(
             Auth(
                 application_id=constants.VONAGE_APPLICATION_ID,
-                private_key="private.key",
+                private_key="./app/config/private.key",
             )
         )
 
