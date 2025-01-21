@@ -125,3 +125,13 @@ async def export_all_customers_data(user_id = Depends(get_current_user_id)):
     response = await services.export_all_customers_data_from_service_titan()
     logger.debug("Response from export all customers data controller")
     return response
+
+
+@router.get(
+    "/get-service-titan-tags"
+)
+async def get_service_titan_tags(continueFrom:str = None, user_id = Depends(get_current_user_id)):
+    logger.debug("Inside get service titan tags controller")
+    response = await services.get_service_titan_tags(continueFrom)
+    logger.debug("Response from get service titan tags controller")
+    return response

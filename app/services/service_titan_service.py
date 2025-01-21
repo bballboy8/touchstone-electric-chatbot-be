@@ -5,6 +5,9 @@ from concurrent.futures import ThreadPoolExecutor
 from thirdparty.service_titan_api_service import ServiceTitanApiService
 from logging_module import logger
 from models.service_titan import ServiceTitanCustomer, ServiceTitanBookingRequest
+from config import constants
+from db_connection import db
+from pymongo import UpdateOne
 
 
 async def get_service_titan_employees(
@@ -30,7 +33,6 @@ async def get_service_titan_customers(
     try:
         service_titan_api_service = ServiceTitanApiService()
         response = await service_titan_api_service.get_customers(page, page_size, phone_number)
-        print(response)
         logger.info("Service Titan customers received")
         if response["status_code"] != 200:
             return response
@@ -172,11 +174,13 @@ async def fetch_data(function_call):
         return {"status_code": 500, "data": f"Internal server error:{e}"}
 
 
-async def associate_user_contacts_threaded(user_list, contact_list):
+async def associate_user_contacts_threaded(user_list, contact_list, tag_list):
     users_dict = {
         user["id"]: {
-            "id": user["id"],
+            "service_titan_id": user["id"],
             "name": user["name"],
+            "type": user["type"],
+            "tag_id": user["tagTypeIds"],
             **user["address"],
         }
         for user in user_list
@@ -195,6 +199,18 @@ async def associate_user_contacts_threaded(user_list, contact_list):
     with ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
         executor.map(process_contact, contact_list)
 
+
+    def process_tag(user_id):
+        user = users_dict[user_id]
+        user["tags"] = []
+        for tag_id in user["tag_id"]:
+            tag = next((tag for tag in tag_list if tag["id"] == tag_id), None)
+            if tag:
+                user["tags"].append(tag["name"])
+
+    with ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
+        executor.map(process_tag, users_dict.keys())
+
     return list(users_dict.values())
 
 
@@ -208,11 +224,13 @@ async def export_all_customers_data_from_service_titan():
         func_list = [
             service_titan_api_service.export_all_customers_data,
             service_titan_api_service.export_all_customers_contacts,
+            service_titan_api_service.export_all_service_titan_tags
         ]
 
         responses = await asyncio.gather(
             fetch_data(func_list[0]),
-            fetch_data(func_list[1])
+            fetch_data(func_list[1]),
+            fetch_data(func_list[2]),
         )
 
         response = responses[0]
@@ -229,7 +247,15 @@ async def export_all_customers_data_from_service_titan():
         all_contacts = response["data"]
         logger.info(f"Total contacts: {len(all_contacts)}")
 
-        all_data = await associate_user_contacts_threaded(all_meta_data, all_contacts)
+        response = responses[2]
+        if response["status_code"] != 200:
+            return response
+        all_tags = response["data"]
+        logger.info(f"Total tags: {len(all_tags)}")
+
+        all_data = await associate_user_contacts_threaded(all_meta_data, all_contacts, all_tags)
+
+        response = await seed_in_database(all_data)
 
         end_time = time.time()
         total_time = end_time - start_time
@@ -240,11 +266,73 @@ async def export_all_customers_data_from_service_titan():
             "data": {
                 "total_records": len(all_meta_data),
                 "total_contacts": len(all_contacts),
-                "aggregate_records": all_data[:10],
                 "aggregate_records_length": len(all_data),
                 "time_taken": total_time,
+                "response": response,
             },
         }
     except Exception as e:
         logger.error(f"Error exporting all customers from Service Titan: {e}")
+        return {"status_code": 500, "data": f"Internal server error:{e}"}
+
+
+async def seed_in_database(new_batch):
+    try:
+        # Step 1: Extract all IDs from the new batch
+        users_collection = db[constants.USERS_COLLECTION]
+        incoming_ids = [record["service_titan_id"] for record in new_batch]
+
+        # Step 2: Retrieve all matching records from MongoDB in one query
+        existing_records = users_collection.find({"service_titan_id": {"$in": incoming_ids}})
+        existing_records_dict = {record["service_titan_id"]: record async for record in existing_records}
+
+        # Step 3: Prepare bulk operations
+        bulk_operations = []
+
+        for record in new_batch:
+            record_id = record["service_titan_id"]
+            existing_record = existing_records_dict.get(record_id)
+
+            if existing_record:
+                updates = {}
+                for key, value in record.items():
+                    if key != "service_titan_id" and value != existing_record.get(key):
+                        updates[key] = value
+
+                if updates:
+                    bulk_operations.append(
+                        UpdateOne(
+                            {"service_titan_id": record_id},
+                            {"$set": updates}
+                        )
+                    )
+            else:
+                bulk_operations.append(
+                    UpdateOne(
+                        {"service_titan_id": record_id},
+                        {"$setOnInsert": record},
+                        upsert=True
+                    )
+                )
+
+        if bulk_operations:
+            result = await users_collection.bulk_write(bulk_operations)
+            return (f"Matched: {result.matched_count}, Modified: {result.modified_count}, Upserts: {result.upserted_count}")
+        else:
+            return ("No changes detected.")
+    except Exception as e:
+        logger.error(f"Error seeding in database: {e}")
+        return f"Internal server error: {e}"
+
+async def get_service_titan_tags(continueFrom: str):
+    logger.info("Getting Service Titan customer tags")
+    try:
+        service_titan_api_service = ServiceTitanApiService()
+        response = await service_titan_api_service.export_all_service_titan_tags(continueFrom)
+        logger.info("Service Titan customer tags received")
+        if response["status_code"] != 200:
+            return response
+        return {"status_code": 200, "data": response["data"]}
+    except Exception as e:
+        logger.error(f"Error getting Service Titan customer tags: {e}")
         return {"status_code": 500, "data": f"Internal server error:{e}"}
