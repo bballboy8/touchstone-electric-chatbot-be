@@ -23,6 +23,7 @@ async def send_test_sms(to: str, text: str):
 )
 async def inbound_sms(request: Request, background_tasks: BackgroundTasks):
     logger.debug("Inside Inbound SMS controller")
+    request = await request.json()
     background_tasks.add_task(services.inbound_sms, request)
     logger.debug("Response from Inbound SMS controller")
     return JSONResponse(status_code=200, content="Message received")
