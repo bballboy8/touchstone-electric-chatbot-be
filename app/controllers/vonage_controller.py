@@ -2,6 +2,8 @@ from fastapi import APIRouter, Request
 import services
 from logging_module import logger
 from fastapi.responses import JSONResponse
+# import background_tasks
+from fastapi import BackgroundTasks
 
 router = APIRouter()
 
@@ -19,11 +21,11 @@ async def send_test_sms(to: str, text: str):
 @router.post(
     "/inbound-sms",
 )
-async def inbound_sms(request: Request):
+async def inbound_sms(request: Request, background_tasks: BackgroundTasks):
     logger.debug("Inside Inbound SMS controller")
-    response = await services.inbound_sms(request)
+    background_tasks.add_task(services.inbound_sms, request)
     logger.debug("Response from Inbound SMS controller")
-    return JSONResponse(status_code=response["status_code"], content=response["data"])
+    return JSONResponse(status_code=200, content="Message received")
 
 
 @router.post(

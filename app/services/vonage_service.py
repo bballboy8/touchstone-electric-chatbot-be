@@ -63,6 +63,8 @@ async def inbound_sms(request):
         logger.info("Returning from Inbound SMS service")
         return {"status_code": 200, "data": "Inbound SMS service"}
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         logger.error(f"Error in inbound_sms: {e}")
         return {"status_code": 500, "data": f"Internal Server Error: {e}"}
 
