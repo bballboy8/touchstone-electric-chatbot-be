@@ -362,3 +362,26 @@ class ServiceTitanApiService:
         except Exception as e:
             return {"status_code": 500, "data": f"Internal server error: {e}"}
             
+    async def export_all_service_titan_tags(self, continueFrom: str = None):
+        try:
+            response = await self._get_access_token()
+            if response["status_code"] != 200:
+                return response
+            access_token = response["data"]["access_token"]
+            url = f"{self.api_url}/settings/v2/tenant/{self.tenant_id}/export/tag-types"
+            if continueFrom:
+                url += f"?from={continueFrom}"
+            headers = {
+                "Authorization": access_token,
+                "ST-App-Key": self.app_key,
+            }
+            response = requests.get(url, headers=headers)
+            if response.status_code != 200:
+                return {
+                    "status_code": response.status_code,
+                    "data": json.loads(response.text),
+                }
+            response.raise_for_status()
+            return {"status_code": 200, "data": response.json()}
+        except Exception as e:
+            return {"status_code": 500, "data": f"Internal server error: {e}"}
