@@ -22,7 +22,6 @@ async def send_test_sms(to, text):
 
 async def inbound_sms(request):
     try:
-        request = await request.json()
 
         vonage_api = VonageApi()
         openai_client = OpenAIService()
