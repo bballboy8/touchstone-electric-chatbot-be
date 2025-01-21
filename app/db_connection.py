@@ -6,7 +6,7 @@ load_dotenv()
 db_constant = "exmachina"
 db_username = os.getenv('DB_USER_NAME', db_constant)
 db_password = os.getenv('DB_PASSWORD', db_constant)
-db_name = os.getenv('DB_NAME', 'ExMachina')
+db_name = os.getenv('DB_NAME', 'exmachina')
 
 
 def get_mongodb_connection_string():
