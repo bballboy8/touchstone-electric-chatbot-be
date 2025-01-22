@@ -5,6 +5,7 @@ from thirdparty.pinecone_service import PineConeDBService
 from db_connection import db
 from config import constants
 from datetime import datetime
+from datetime import timedelta
 
 async def send_test_sms(to, text):
     try:
@@ -19,6 +20,16 @@ async def send_test_sms(to, text):
         }
     except Exception as e:
         logger.error(f"Error in send_test_sms: {e}")
+        return {"status_code": 500, "data": f"Internal Server Error: {e}"}
+
+async def get_users_previous_messages_history_of_last_30_days(msisdn):
+    try:
+        vonage_webhooks_collection = db[constants.VONAGE_WEBHOOKS_COLLECTION]
+        query = {"msisdn": msisdn, "created_at": {"$gte": datetime.now() - timedelta(days=30)}}
+        history = await vonage_webhooks_collection.find(query).to_list(length=None)
+        return {"status_code": 200, "data": list(history)}
+    except Exception as e:
+        logger.error(f"Error in get_users_previous_messages_history_of_last_30_days: {e}")
         return {"status_code": 500, "data": f"Internal Server Error: {e}"}
 
 
@@ -54,6 +65,9 @@ async def inbound_sms(request):
             return response
         
         gpt_response = response["response"]
+        request['query'] = query  
+        request["response"] = gpt_response
+        vonage_webhooks_collection.insert_one(request)
 
         if channel == "whatsapp":
             logger.info("Sending WhatsApp message")
@@ -64,9 +78,6 @@ async def inbound_sms(request):
             response = vonage_api.send_sms(to, gpt_response)
             return response
 
-        request['query'] = query  
-        request["response"] = gpt_response
-        vonage_webhooks_collection.insert_one(request)
         logger.info("Returning from Inbound SMS service")
         return {"status_code": 200, "data": "Inbound SMS service"}
     except Exception as e:
