@@ -102,8 +102,6 @@ async def inbound_sms(request):
         
         gpt_response = response["response"]
         request['query'] = query  
-        request["response"] = gpt_response
-        vonage_webhooks_collection.insert_one(request)
 
         if "booking_confirm" in gpt_response:
             response = await train_agent_service.execute_booking_intent(query, history_response["data"], 'SMS')
@@ -124,6 +122,9 @@ async def inbound_sms(request):
 
         print(gpt_response, "gpt response")
 
+        request["response"] = gpt_response
+        vonage_webhooks_collection.insert_one(request)
+        
         if channel == "whatsapp":
             logger.info("Sending WhatsApp message")
             response = vonage_api.send_whatsapp_message(to, gpt_response)
