@@ -146,6 +146,27 @@ class OpenAIService:
                 "message": f"An error occurred while getting system prompt for AI agent: {e}",
                 "status_code": 500,
             }
+        
+    async def get_system_prompt_for_sms_agent(self, context: str):
+        try:
+            print(os.getcwd())
+            if not os.path.exists("sms_agent_system_prompt.txt"):
+                with open("sms_agent_system_prompt.txt", "w") as file:
+                    file.write("Be professional and courteous in your responses.")
+
+            with open("sms_agent_system_prompt.txt", "r") as file:
+                prompt_template = file.read()
+                prompt_template += f"""
+                    Use the provided context to answer user queries effectively:
+                    Context: {context}
+                """
+            prompt_template= "You works for Touchstone Electric. " + prompt_template
+            return {"status_code": 200, "system_prompt": prompt_template}
+        except Exception as e:
+            return {
+                "message": f"An error occurred while getting system prompt for AI agent: {e}",
+                "status_code": 500,
+            }
 
     async def generate_ai_agent_response(self, context:str, query: str):
         try:
@@ -242,7 +263,7 @@ class OpenAIService:
             current_time = convert_to_est(datetime.now().timestamp())
 
             system_prompt += f"""
-                Current Time : {current_time}
+                Current Time in EST : {current_time}
             """
             
             response = await self.get_gpt_response_with_history(
@@ -346,5 +367,33 @@ class OpenAIService:
         except Exception as e:
             return {
                 "message": f"An error occurred while generating conversation summary: {e}",
+                "status_code": 500,
+            }
+        
+    async def generate_sms_agent_response_with_history(
+        self, context: str, query: str, previous_messages: list
+    ):
+        try:
+            system_prompt = await self.get_system_prompt_for_sms_agent(context)
+            if system_prompt.get("status_code") != 200:
+                return system_prompt
+
+            system_prompt = system_prompt.get("system_prompt")
+
+            current_time = convert_to_est(datetime.now().timestamp())
+
+            system_prompt += f"""
+                Current Time in EST : {current_time}
+            """
+            
+            response = await self.get_gpt_response_with_history(
+                prompt=query,
+                system_prompt=system_prompt,
+                previous_messages=previous_messages,
+            )
+            return response
+        except Exception as e:
+            return {
+                "message": f"An error occurred while Generating AI agent response via OpenAI API: {e}",
                 "status_code": 500,
             }

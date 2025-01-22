@@ -1,11 +1,13 @@
 from logging_module import logger
 from thirdparty.vonage_service import VonageApi
-from thirdparty.openai_service import OpenAIService
+from thirdparty.openai_service import OpenAIService, convert_to_est
 from thirdparty.pinecone_service import PineConeDBService
 from db_connection import db
 from config import constants
 from datetime import datetime
 from datetime import timedelta
+import pytz
+
 
 async def send_test_sms(to, text):
     try:
@@ -22,12 +24,37 @@ async def send_test_sms(to, text):
         logger.error(f"Error in send_test_sms: {e}")
         return {"status_code": 500, "data": f"Internal Server Error: {e}"}
 
+async def db_output_formatter_to_openai_format(messages:list):
+    try:
+        formatted_data = []
+        for message in messages:
+            user_content = f"Message Timestamp in EST: {message['created_at']} \nMessage : {message['query']}"
+            assistant_content = f"Message Timestamp in EST: {message['created_at']} \nMessage : {message['response']}"
+            formatted_data.append(
+                {
+                    "role": "user", 
+                    "content": [{"type": "text", "text": user_content}]
+                }
+            )
+            formatted_data.append(
+                {
+                    "role": "assistant", 
+                    "content": [{"type": "text", "text": assistant_content}]
+                }
+            )
+        return formatted_data
+    except Exception as e:
+        logger.error(f"Error in db_output_formatter_to_openai_format: {e}")
+        return {"status_code": 500, "data": f"Internal Server Error: {e}"}
+
+
 async def get_users_previous_messages_history_of_last_30_days(msisdn):
     try:
         vonage_webhooks_collection = db[constants.VONAGE_WEBHOOKS_COLLECTION]
-        query = {"msisdn": msisdn, "created_at": {"$gte": datetime.now() - timedelta(days=30)}}
-        history = await vonage_webhooks_collection.find(query).to_list(length=None)
-        return {"status_code": 200, "data": list(history)}
+        query = {"msisdn": msisdn, "created_at": {"$gte": datetime.now() - timedelta(days=30)}, "source": "inbound_sms"}
+        history = await vonage_webhooks_collection.find(query, {'query':1, 'response':1, 'messageId':1, "_id":0, "created_at":1}).to_list(length=None)
+        formatted_response = await db_output_formatter_to_openai_format(list(history))
+        return {"status_code": 200, "data": formatted_response}
     except Exception as e:
         logger.error(f"Error in get_users_previous_messages_history_of_last_30_days: {e}")
         return {"status_code": 500, "data": f"Internal Server Error: {e}"}
@@ -37,7 +64,9 @@ async def inbound_sms(request):
     try:
         vonage_webhooks_collection = db[constants.VONAGE_WEBHOOKS_COLLECTION]
         request['source'] = 'inbound_sms'
-        request["created_at"] = datetime.now()
+        utc_now = datetime.now(pytz.utc)
+        est_now = utc_now.astimezone(pytz.timezone('US/Eastern'))
+        request["created_at"] = est_now
 
         vonage_api = VonageApi()
         openai_client = OpenAIService()
@@ -58,8 +87,16 @@ async def inbound_sms(request):
         matches = response["response"]["matches"]
         context = " ".join([match["metadata"]["text"] for match in matches])
 
-        response = await openai_client.generate_ai_agent_response(
-            context=context, query=query
+        # get users previous messages history of last 30 days
+        msisdn = request["msisdn"]
+        history_response = await get_users_previous_messages_history_of_last_30_days(msisdn)
+
+        if history_response["status_code"] != 200:
+            logger.error(f"Error in inbound_sms: {history_response['data']}")
+            history_response = {"data": []}
+
+        response = await openai_client.generate_sms_agent_response_with_history(
+            context=context, query=query, previous_messages=history_response["data"]
         )
         if response["status_code"] != 200:
             return response
