@@ -106,7 +106,7 @@ async def inbound_sms(request):
         vonage_webhooks_collection.insert_one(request)
 
         if "booking_confirm" in gpt_response:
-            response = await train_agent_service.execute_booking_intent(query, history_response["data"], 'sms')
+            response = await train_agent_service.execute_booking_intent(query, history_response["data"], 'SMS')
             gpt_response = response["response"]
         
         elif "event_hiring" in gpt_response:
