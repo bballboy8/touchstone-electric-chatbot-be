@@ -396,7 +396,7 @@ def check_for_malicious_content(query):
             return True
     return None
 
-async def execute_booking_intent(query: str, previous_messages: list):
+async def execute_booking_intent(query: str, previous_messages: list, source="website"):
     try:
         openai_client = OpenAIService()
 
@@ -434,7 +434,7 @@ async def execute_booking_intent(query: str, previous_messages: list):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f""" *Marketing Source*: Website"""
+                    "text": f""" *Marketing Source*: {source}"""
                 }
                 }
             ]
