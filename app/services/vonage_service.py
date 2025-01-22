@@ -108,7 +108,7 @@ async def inbound_sms(request):
             gpt_response = response["response"]
         
         elif "event_hiring" in gpt_response:
-            response = await train_agent_service.execute_hiring_intent(query, history_response["data"])
+            response = await train_agent_service.execute_hiring_intent(query, history_response["data"], 'SMS')
             gpt_response = response["response"]
         else:
             event_list = [
@@ -116,7 +116,7 @@ async def inbound_sms(request):
             ]
             for event in event_list:
                 if event in gpt_response:
-                    response = await train_agent_service.execute_intent(query, history_response["data"], event)
+                    response = await train_agent_service.execute_intent(query, history_response["data"], event, 'SMS')
                     gpt_response = response["response"]
                     break
 

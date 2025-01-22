@@ -453,7 +453,7 @@ async def execute_booking_intent(query: str, previous_messages: list, source="we
 permitting, inspections, customer complaints, invoices, estimates/sales questions, change orders, hiring, warranty
 """
 
-async def execute_intent(query: str, previous_messages: list, event_name: str):
+async def execute_intent(query: str, previous_messages: list, event_name: str, source="website"):
     try:
         openai_client = OpenAIService()
 
@@ -493,7 +493,7 @@ async def execute_intent(query: str, previous_messages: list, event_name: str):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f""" *Marketing Source*: Website"""
+                    "text": f""" *Marketing Source*: {source}"""
                 }
                 }
             ]
@@ -513,7 +513,7 @@ async def execute_intent(query: str, previous_messages: list, event_name: str):
         traceback.print_exc()
         return {"status_code": 500, "response": f" {e}"}
 
-async def execute_hiring_intent(query: str, previous_messages: list):
+async def execute_hiring_intent(query: str, previous_messages: list, source="website"):
     try:
         logger.debug("Inside Hiring Intent")
         openai_client = OpenAIService()
@@ -554,7 +554,7 @@ async def execute_hiring_intent(query: str, previous_messages: list):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f""" *Marketing Source*: Website"""
+                    "text": f""" *Marketing Source*: {source}"""
                 }
                 }
             ]
