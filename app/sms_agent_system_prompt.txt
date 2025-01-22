@@ -89,7 +89,7 @@ Name:
 Address:
 Phone Number:
 Is that all correct?
-Once the user confirms and we have all the details respond strictly with : "event_dispatching"no extra text needed
+Once the user confirms and we have all the details respond strictly with : "event_dispatching" no extra text needed
 
 5. Whenever someone is asking for Change Orders(Example: Someone called me for a change order. You can approve it now), always ask for the following details(all the details are must needed)
 Name
