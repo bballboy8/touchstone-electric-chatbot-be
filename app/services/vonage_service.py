@@ -25,6 +25,7 @@ async def send_test_sms(to, text):
 async def inbound_sms(request):
     try:
         vonage_webhooks_collection = db[constants.VONAGE_WEBHOOKS_COLLECTION]
+        request['source'] = 'inbound_sms'
         request["created_at"] = datetime.now()
         vonage_webhooks_collection.insert_one(request)
 
@@ -76,6 +77,7 @@ async def inbound_sms(request):
 async def sms_status(request):
     try:
         vonage_webhooks_collection = db[constants.VONAGE_WEBHOOKS_COLLECTION]
+        request['source'] = 'sms_status'
         request["created_at"] = datetime.now()
         vonage_webhooks_collection.insert_one(request)
         logger.info("Inside SMS Status service")
