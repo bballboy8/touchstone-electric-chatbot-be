@@ -64,9 +64,7 @@ async def inbound_sms(request):
     try:
         vonage_webhooks_collection = db[constants.VONAGE_WEBHOOKS_COLLECTION]
         request['source'] = 'inbound_sms'
-        utc_now = datetime.now(pytz.utc)
-        est_now = utc_now.astimezone(pytz.timezone('US/Eastern'))
-        request["created_at"] = est_now
+        request["created_at"] = datetime.now()
 
         vonage_api = VonageApi()
         openai_client = OpenAIService()

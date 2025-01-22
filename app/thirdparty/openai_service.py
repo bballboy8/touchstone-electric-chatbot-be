@@ -380,7 +380,7 @@ class OpenAIService:
 
             system_prompt = system_prompt.get("system_prompt")
 
-            current_time = convert_to_est(datetime.now().timestamp())
+            current_time = datetime.now()
 
             system_prompt += f"""
                 Current Time in EST : {current_time}
