@@ -5,8 +5,9 @@ import os
 from fastapi import UploadFile, File
 from datetime import datetime
 import pytz
+import time
 
-def convert_to_est(epoch_time):
+def convert_to_est(epoch_time, format_date=True):
     """
     Convert a given epoch time (time.time()) to a formatted string in EST.
 
@@ -20,6 +21,8 @@ def convert_to_est(epoch_time):
     
     est_timezone = pytz.timezone("US/Eastern")
     est_time = utc_time.astimezone(est_timezone)
+    if not format_date:
+        return est_time
     return est_time.strftime("%Y-%m-%d %H:%M:%S")
 
 class OpenAIService:
@@ -260,7 +263,7 @@ class OpenAIService:
 
             system_prompt = system_prompt.get("system_prompt")
 
-            current_time = convert_to_est(datetime.now().timestamp())
+            current_time = convert_to_est(time.time(), True)
 
             system_prompt += f"""
                 Current Time in EST : {current_time}
@@ -380,7 +383,7 @@ class OpenAIService:
 
             system_prompt = system_prompt.get("system_prompt")
 
-            current_time = datetime.now()
+            current_time = convert_to_est(time.time(), True)
 
             system_prompt += f"""
                 Current Time in EST : {current_time}

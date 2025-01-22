@@ -6,7 +6,7 @@ from db_connection import db
 from config import constants
 from datetime import datetime
 from datetime import timedelta
-import pytz
+import time
 
 
 async def send_test_sms(to, text):
@@ -64,7 +64,8 @@ async def inbound_sms(request):
     try:
         vonage_webhooks_collection = db[constants.VONAGE_WEBHOOKS_COLLECTION]
         request['source'] = 'inbound_sms'
-        request["created_at"] = datetime.now()
+        # convert to EST timezone
+        request["created_at"] = convert_to_est(time.time(), False)
 
         vonage_api = VonageApi()
         openai_client = OpenAIService()
