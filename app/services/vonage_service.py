@@ -27,7 +27,6 @@ async def inbound_sms(request):
         vonage_webhooks_collection = db[constants.VONAGE_WEBHOOKS_COLLECTION]
         request['source'] = 'inbound_sms'
         request["created_at"] = datetime.now()
-        vonage_webhooks_collection.insert_one(request)
 
         vonage_api = VonageApi()
         openai_client = OpenAIService()
@@ -64,7 +63,10 @@ async def inbound_sms(request):
             logger.info("Sending SMS message")
             response = vonage_api.send_sms(to, gpt_response)
             return response
-        
+
+        request['query'] = query  
+        request["response"] = gpt_response
+        vonage_webhooks_collection.insert_one(request)
         logger.info("Returning from Inbound SMS service")
         return {"status_code": 200, "data": "Inbound SMS service"}
     except Exception as e:
