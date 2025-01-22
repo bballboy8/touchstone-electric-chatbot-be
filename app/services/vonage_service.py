@@ -29,7 +29,6 @@ async def db_output_formatter_to_openai_format(messages:list):
         formatted_data = []
         for message in messages:
             user_content = f"Message Timestamp in EST: {message['created_at']} \nMessage : {message['query']}"
-            assistant_content = f"Message Timestamp in EST: {message['created_at']} \nMessage : {message['response']}"
             formatted_data.append(
                 {
                     "role": "user", 
@@ -39,7 +38,7 @@ async def db_output_formatter_to_openai_format(messages:list):
             formatted_data.append(
                 {
                     "role": "assistant", 
-                    "content": [{"type": "text", "text": assistant_content}]
+                    "content": [{"type": "text", "text": message['response']}]
                 }
             )
         return formatted_data
