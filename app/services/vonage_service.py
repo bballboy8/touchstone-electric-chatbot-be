@@ -2,7 +2,9 @@ from logging_module import logger
 from thirdparty.vonage_service import VonageApi
 from thirdparty.openai_service import OpenAIService
 from thirdparty.pinecone_service import PineConeDBService
-
+from db_connection import db
+from config import constants
+from datetime import datetime
 
 async def send_test_sms(to, text):
     try:
@@ -22,6 +24,9 @@ async def send_test_sms(to, text):
 
 async def inbound_sms(request):
     try:
+        vonage_webhooks_collection = db[constants.VONAGE_WEBHOOKS_COLLECTION]
+        request["created_at"] = datetime.now()
+        vonage_webhooks_collection.insert_one(request)
 
         vonage_api = VonageApi()
         openai_client = OpenAIService()
@@ -70,8 +75,9 @@ async def inbound_sms(request):
 
 async def sms_status(request):
     try:
-        request = await request.json()
-        print(request)
+        vonage_webhooks_collection = db[constants.VONAGE_WEBHOOKS_COLLECTION]
+        request["created_at"] = datetime.now()
+        vonage_webhooks_collection.insert_one(request)
         logger.info("Inside SMS Status service")
         return {"status_code": 200, "data": "SMS Status service"}
     except Exception as e:

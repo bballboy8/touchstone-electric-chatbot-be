@@ -32,8 +32,9 @@ async def inbound_sms(request: Request, background_tasks: BackgroundTasks):
 @router.post(
     "/sms-status",
 )
-async def sms_status(request: Request):
+async def sms_status(request: Request, background_tasks: BackgroundTasks):
     logger.debug("Inside SMS Status controller")
-    response = await services.sms_status(request)
+    request = await request.json()
+    background_tasks.add_task(services.sms_status, request)
     logger.debug("Response from SMS Status controller")
-    return JSONResponse(status_code=response["status_code"], content=response["data"])
+    return JSONResponse(status_code=200, content="Status received")
