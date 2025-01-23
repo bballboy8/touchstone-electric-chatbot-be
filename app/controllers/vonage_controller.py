@@ -2,7 +2,6 @@ from fastapi import APIRouter, Request, Depends
 import services
 from logging_module import logger
 from fastapi.responses import JSONResponse
-# import background_tasks
 from fastapi import BackgroundTasks
 from utils.dependencies import get_current_user_id
 
