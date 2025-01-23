@@ -48,3 +48,12 @@ async def get_users_previous_messages_history_of_last_30_days(msisdn: str):
     response = await services.get_users_previous_messages_history_of_last_30_days(msisdn)
     logger.debug("Response from Get Users Previous Messages History of Last 30 Days controller")
     return JSONResponse(status_code=response["status_code"], content=response["data"])
+
+@router.get(
+    "/get-server-time",
+)
+async def get_server_time():
+    logger.debug("Inside Get Server Time controller")
+    response = await services.get_server_time()
+    logger.debug("Response from Get Server Time controller")
+    return JSONResponse(status_code=response["status_code"], content=response["data"])

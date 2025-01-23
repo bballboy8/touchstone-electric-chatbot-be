@@ -58,6 +58,13 @@ async def get_users_previous_messages_history_of_last_30_days(msisdn):
     except Exception as e:
         logger.error(f"Error in get_users_previous_messages_history_of_last_30_days: {e}")
         return {"status_code": 500, "data": f"Internal Server Error: {e}"}
+    
+async def get_server_time():
+    try:
+        return {"status_code": 200, "data": convert_to_est(time.time(), False)}
+    except Exception as e:
+        logger.error(f"Error in get_server_time: {e}")
+        return {"status_code": 500, "data": f"Internal Server Error: {e}"}
 
 
 async def inbound_sms(request):
