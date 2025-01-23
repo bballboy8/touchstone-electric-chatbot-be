@@ -131,8 +131,6 @@ async def inbound_sms(request):
         matches = response["response"]["matches"]
         context = " ".join([match["metadata"]["text"] for match in matches])
 
-        context ="User Details: \n" + user_details["data"] + "\n" + context
-
         # get users previous messages history of last 30 days
         msisdn = request["msisdn"]
         history_response = await get_users_previous_messages_history_of_last_30_days(msisdn)
@@ -142,7 +140,7 @@ async def inbound_sms(request):
             history_response = {"data": []}
 
         response = await openai_client.generate_sms_agent_response_with_history(
-            context=context, query=query, previous_messages=history_response["data"]
+            context=context, query=query, previous_messages=history_response["data"], user_details=user_details["data"]
         )
         if response["status_code"] != 200:
             return response

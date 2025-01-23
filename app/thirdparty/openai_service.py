@@ -374,7 +374,7 @@ class OpenAIService:
             }
         
     async def generate_sms_agent_response_with_history(
-        self, context: str, query: str, previous_messages: list
+        self, context: str, query: str, previous_messages: list, user_details: str
     ):
         try:
             system_prompt = await self.get_system_prompt_for_sms_agent(context)
@@ -383,13 +383,13 @@ class OpenAIService:
 
             system_prompt = system_prompt.get("system_prompt")
 
-            print(system_prompt)
-
             current_time = convert_to_est(time.time(), False)
 
             system_prompt += f"""
                 Current Time in EST : {str(current_time)}
             """
+            user_details = "USER DETAILS: " + user_details
+            system_prompt.replace("USER DETAILS", user_details)
             
             response = await self.get_gpt_response_with_history(
                 prompt=query,

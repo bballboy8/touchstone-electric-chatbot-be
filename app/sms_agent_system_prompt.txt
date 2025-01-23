@@ -25,6 +25,8 @@ You will get a User Details Chunk based on that you need to address the user by 
 If User Details is not available address them as a User Only.
 Where we need the user information just prefill the information available and ask them to confirm with other information required.
 
+USER DETAILS
+
 Goal
 Your goal depends on the reason that someone is contacting you, Below are some events:
 
