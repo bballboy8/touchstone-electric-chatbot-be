@@ -383,6 +383,8 @@ class OpenAIService:
 
             system_prompt = system_prompt.get("system_prompt")
 
+            print(system_prompt)
+
             current_time = convert_to_est(time.time(), False)
 
             system_prompt += f"""
