@@ -131,7 +131,7 @@ async def inbound_sms(request):
         matches = response["response"]["matches"]
         context = " ".join([match["metadata"]["text"] for match in matches])
 
-        context += "\n" + "User Details: \n" + user_details["data"]
+        context ="User Details: \n" + user_details["data"] + "\n" + context
 
         # get users previous messages history of last 30 days
         msisdn = request["msisdn"]
