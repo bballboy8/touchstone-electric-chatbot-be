@@ -376,6 +376,7 @@ class OpenAIService:
     async def generate_sms_agent_response_with_history(
         self, context: str, query: str, previous_messages: list, user_details: str
     ):
+        print("Final User Infor", user_details)
         try:
             system_prompt = await self.get_system_prompt_for_sms_agent(context)
             if system_prompt.get("status_code") != 200:
@@ -388,9 +389,9 @@ class OpenAIService:
             system_prompt += f"""
                 Current Time in EST : {str(current_time)}
             """
-            user_details = "USER DETAILS: " + user_details
-            system_prompt.replace("USER DETAILS", user_details)
-            
+            user_details = "USER DETAILS: \n" + user_details.replace("mobilephone", "phone")
+            system_prompt = system_prompt.replace("USER DETAILS", user_details)
+            print(system_prompt, "system_prompt")
             response = await self.get_gpt_response_with_history(
                 prompt=query,
                 system_prompt=system_prompt,
