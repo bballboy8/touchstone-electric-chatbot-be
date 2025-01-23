@@ -383,10 +383,10 @@ class OpenAIService:
 
             system_prompt = system_prompt.get("system_prompt")
 
-            current_time = convert_to_est(time.time(), True)
+            current_time = convert_to_est(time.time(), False)
 
             system_prompt += f"""
-                Current Time in EST : {current_time}
+                Current Time in EST : {str(current_time)}
             """
             
             response = await self.get_gpt_response_with_history(

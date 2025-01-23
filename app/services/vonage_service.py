@@ -8,6 +8,7 @@ from datetime import datetime
 from datetime import timedelta
 import time
 from services import train_agent_service
+import pytz
 
 
 async def send_test_sms(to, text):
@@ -29,7 +30,10 @@ async def db_output_formatter_to_openai_format(messages:list):
     try:
         formatted_data = []
         for message in messages:
-            user_content = f"Message Timestamp in EST: {message['created_at']} \nMessage : {message['query']}"
+            converted_time = message["created_at"]
+            est_timezone = pytz.timezone("US/Eastern")
+            converted_time = converted_time.astimezone(est_timezone)
+            user_content = f"Message Timestamp in EST: {converted_time} \nMessage : {message['query']}"
             formatted_data.append(
                 {
                     "role": "user", 
@@ -76,6 +80,7 @@ async def inbound_sms(request):
         # convert to EST timezone
         request["created_at"] = convert_to_est(time.time(), False)
 
+        print("created at time", request["created_at"])
         vonage_api = VonageApi()
         openai_client = OpenAIService()
         pinecone_client = PineConeDBService()
