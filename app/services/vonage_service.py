@@ -62,7 +62,7 @@ async def get_users_previous_messages_history_of_last_30_days(msisdn):
     except Exception as e:
         logger.error(f"Error in get_users_previous_messages_history_of_last_30_days: {e}")
         return {"status_code": 500, "data": f"Internal Server Error: {e}"}
-    
+
 async def get_server_time():
     try:
         final_time = convert_to_est(time.time(), False)
@@ -70,6 +70,32 @@ async def get_server_time():
         return {"status_code": 200, "data": str(final_time)}
     except Exception as e:
         logger.error(f"Error in get_server_time: {e}")
+        return {"status_code": 500, "data": f"Internal Server Error: {e}"}
+
+
+async def get_users_details_in_a_text_chunk_from_db(number):
+    try:
+        users_collection = db[constants.USERS_COLLECTION]
+        number_combinations = [str(number)[1:], str(number)[2:], str(number)]
+        query = {
+            "$or": [
+                {"mobilephone": {"$exists": True, "$elemMatch": {"$in": number_combinations}}},
+                {"phone": {"$exists": True, "$elemMatch": {"$in": number_combinations}}},
+            ]
+        }
+        user_details = await users_collection.find_one(query, {"_id": 0,})
+        formatted_response = ""
+        if not user_details:
+            return {"status_code": 200, "data": "Not Available"}
+        print(user_details, "user_details")
+        for key, value in user_details.items():
+            if value and key not in ['service_titan_id', 'tag_id']:
+                value = value if isinstance(value, str) else ", ".join(value)
+                formatted_response += f"{key}: {value}\n"
+
+        return {"status_code": 200, "data": formatted_response}
+    except Exception as e:
+        logger.error(f"Error in get_users_details_in_a_text_chunk_from_db: {e}")
         return {"status_code": 500, "data": f"Internal Server Error: {e}"}
 
 
@@ -93,12 +119,19 @@ async def inbound_sms(request):
 
         to = request["msisdn"]
 
+        user_details = await get_users_details_in_a_text_chunk_from_db(to)
+        if user_details["status_code"] != 200:
+            logger.error(f"Error in inbound_sms: {user_details['data']}")
+            user_details = {"data": "Not Available"}
+
         response = await pinecone_client.query_data(query, 3, None)
         if response["status_code"] != 200:
             return response
 
         matches = response["response"]["matches"]
         context = " ".join([match["metadata"]["text"] for match in matches])
+
+        context += "\n" + "User Details: \n" + user_details["data"]
 
         # get users previous messages history of last 30 days
         msisdn = request["msisdn"]

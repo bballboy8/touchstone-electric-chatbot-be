@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Depends
 import services
 from logging_module import logger
 from fastapi.responses import JSONResponse
 # import background_tasks
 from fastapi import BackgroundTasks
+from utils.dependencies import get_current_user_id
 
 router = APIRouter()
 
@@ -52,8 +53,17 @@ async def get_users_previous_messages_history_of_last_30_days(msisdn: str):
 @router.get(
     "/get-server-time",
 )
-async def get_server_time():
+async def get_server_time(user_id = Depends(get_current_user_id)):
     logger.debug("Inside Get Server Time controller")
     response = await services.get_server_time()
     logger.debug("Response from Get Server Time controller")
+    return JSONResponse(status_code=response["status_code"], content=response["data"])
+
+@router.get(
+    '/get-users-details-in-a-text-chunk-from-db',
+)
+async def get_users_details_in_a_text_chunk_from_db(number: int, user_id = Depends(get_current_user_id)):
+    logger.debug("Inside Get Users Details in a Text Chunk from DB controller")
+    response = await services.get_users_details_in_a_text_chunk_from_db(number)
+    logger.debug("Response from Get Users Details in a Text Chunk from DB controller")
     return JSONResponse(status_code=response["status_code"], content=response["data"])

@@ -152,7 +152,7 @@ class OpenAIService:
         
     async def get_system_prompt_for_sms_agent(self, context: str):
         try:
-            print(os.getcwd())
+            print(os.getcwd(), os.path.exists("sms_agent_system_prompt.txt"))
             if not os.path.exists("sms_agent_system_prompt.txt"):
                 with open("sms_agent_system_prompt.txt", "w") as file:
                     file.write("Be professional and courteous in your responses.")
