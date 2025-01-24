@@ -6,6 +6,7 @@ load_dotenv()
 
 # Environment
 DEBUG = os.getenv("DEBUG", "False") == "True"
+print(f"DEBUG: {DEBUG}")
 
 ALGORITHM = "HS256"
 SECRET_KEY = "secret"

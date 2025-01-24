@@ -241,6 +241,8 @@ async def handle_booking_request(user_query: str, conversation_summary: str = No
 
         json_data = booking_data["raw_data"]
         booking_data = booking_data["data"]
+        if constants.DEBUG:
+            return {"message": "Booking request created successfully", "status_code": 200, "response": json_data, "booking_data": json_data}
         response = await create_booking_request(booking_data, conversation_summary)
         if response["status_code"] != 200:
             return response
