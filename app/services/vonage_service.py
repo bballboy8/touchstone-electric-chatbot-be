@@ -124,7 +124,7 @@ async def inbound_sms(request):
             logger.error(f"Error in inbound_sms: {user_details['data']}")
             user_details = {"data": "Not Available"}
 
-        response = await pinecone_client.query_data(query, 3, None)
+        response = await pinecone_client.query_data(query, 2, None)
         if response["status_code"] != 200:
             return response
 
@@ -146,15 +146,19 @@ async def inbound_sms(request):
             return response
         
         gpt_response = response["response"]
-        request['query'] = query  
+        request['query'] = query
+
+        print("Initial GPT Response: ", gpt_response)  
 
         if "booking_confirm" in gpt_response:
             response = await train_agent_service.execute_booking_intent(query, history_response["data"], 'SMS')
             gpt_response = response["response"]
+            print("Final GPT Response : ", gpt_response)
         
         elif "event_hiring" in gpt_response:
             response = await train_agent_service.execute_hiring_intent(query, history_response["data"], 'SMS')
             gpt_response = response["response"]
+            print("Final GPT Response : ", gpt_response)
         else:
             event_list = [
                 "event_change_orders", "event_new_lead", "event_permit", "event_inspection", "event_collection", "event_dispatching"
@@ -163,18 +167,16 @@ async def inbound_sms(request):
                 if event in gpt_response:
                     response = await train_agent_service.execute_intent(query, history_response["data"], event, 'SMS')
                     gpt_response = response["response"]
+                    print("Final GPT Response : ", gpt_response)
                     break
 
-        print(gpt_response, "gpt response")
 
         request["response"] = gpt_response
         vonage_webhooks_collection.insert_one(request)
         
-        if channel == "whatsapp":
-            logger.info("Sending WhatsApp message")
-            response = vonage_api.send_whatsapp_message(to, gpt_response)
-        elif channel == "sms":
+        if channel == "sms":
             logger.info("Sending SMS message")
+            if constants.DEBUG:return
             response = vonage_api.send_sms(to, gpt_response)
 
         logger.info("Returning from Inbound SMS service")

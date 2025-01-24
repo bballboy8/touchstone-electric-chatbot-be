@@ -17,7 +17,7 @@ from routers import (
 )
 import services
 from fastapi_utils.tasks import repeat_every
-
+from config import constants
 
 @repeat_every(seconds=3600)
 async def service_titan_customers_sync():
@@ -28,6 +28,8 @@ async def service_titan_customers_sync():
         print(f"Error in service_titan_customers_sync: {e}")
 
 async def startup_lifespan():
+    if constants.DEBUG:
+        return
     print("Running startup_lifespan")
     await services.generate_index_service()
     await service_titan_customers_sync()

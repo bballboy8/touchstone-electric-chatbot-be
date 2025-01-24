@@ -438,6 +438,7 @@ async def execute_booking_intent(query: str, previous_messages: list, source="we
                 }
                 }
             ]
+        
         await send_block_to_channel(
             blocks=blocks, channel=constants.SLACK_CHANNEL_DICT["dispatching"]
         )
