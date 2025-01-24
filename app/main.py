@@ -16,10 +16,22 @@ from routers import (
     gmail_router
 )
 import services
+from fastapi_utils.tasks import repeat_every
+
+
+@repeat_every(seconds=3600)
+async def service_titan_customers_sync():
+    try:
+        print("Running service_titan_customers_sync")
+        await services.export_all_customers_data_from_service_titan()
+    except Exception as e:
+        print(f"Error in service_titan_customers_sync: {e}")
 
 async def startup_lifespan():
+    print("Running startup_lifespan")
     await services.generate_index_service()
-
+    await service_titan_customers_sync()
+    print("Finished startup_lifespan")
 
 project = FastAPI(on_startup=[startup_lifespan])
 
