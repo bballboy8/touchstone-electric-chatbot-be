@@ -136,7 +136,8 @@ async def inbound_sms(request):
 
         response = await pinecone_client.query_data(query, 2, None)
         if response["status_code"] != 200:
-            return response
+            logger.error(f"Error in pinecone inbound_sms: {response['data']}")
+            response = {"response": {"matches": []}}
 
         matches = response["response"]["matches"]
         context = " ".join([match["metadata"]["text"] for match in matches])
