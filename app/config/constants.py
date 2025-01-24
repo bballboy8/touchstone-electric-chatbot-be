@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Environment
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
 ALGORITHM = "HS256"
 SECRET_KEY = "secret"
@@ -84,5 +86,4 @@ NOTION_TEAM_CONTACT_PAGE_DATABASE_ID=os.getenv("NOTION_TEAM_CONTACT_PAGE_DATABAS
 # Mongodb Collections
 
 USERS_COLLECTION = "users"
-VONAGE_WEBHOOKS_COLLECTION = "vonage_webhooks"
-VONAGE_WEBHOOKS_LOCAL_COLLECTION = "vonage_webhooks_local"
+VONAGE_WEBHOOKS_COLLECTION = "vonage_webhooks" if not DEBUG else "vonage_webhooks_local"

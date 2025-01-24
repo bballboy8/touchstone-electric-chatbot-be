@@ -19,6 +19,7 @@ class SlackServiceAPI:
         return response
     
     async def send_message_block(self, channel, blocks):
+        if constants.DEBUG: return
         response = self.slack_client.chat_postMessage(
             channel=channel,
             blocks=blocks,
