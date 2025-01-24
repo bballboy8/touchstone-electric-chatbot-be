@@ -102,6 +102,14 @@ async def get_users_details_in_a_text_chunk_from_db(number):
 async def inbound_sms(request):
     try:
         vonage_webhooks_collection = db[constants.VONAGE_WEBHOOKS_COLLECTION]
+
+        # check if this message request is already registered
+        query = {"messageId": request["messageId"]}
+        if await vonage_webhooks_collection.find_one(query) and not constants.DEBUG:
+            logger.info("Message Request already registered")
+            return {"status_code": 200, "data": "Message already registered"}
+
+
         request['source'] = 'inbound_sms'
         # convert to EST timezone
         request["created_at"] = convert_to_est(time.time(), False)
@@ -118,6 +126,8 @@ async def inbound_sms(request):
             channel = request["channel"]
 
         to = request["msisdn"]
+
+        
 
         user_details = await get_users_details_in_a_text_chunk_from_db(to)
         if user_details["status_code"] != 200:
