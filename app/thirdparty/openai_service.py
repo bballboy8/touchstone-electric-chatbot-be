@@ -332,6 +332,7 @@ class OpenAIService:
             system_prompt = """ 
                             Summarize the conversation between the user and the AI agent. 
                             Return a summary of the conversation and reason for visit. You only need to respond with conversation main points no need to include any contact details/address/visit date or time. If email is available please include that. Keep it very concise.
+                            I only need one line summary of the conversation.
                             """
             response = await self.get_gpt_response_with_history(
                 prompt="Generate concise Summary", system_prompt=system_prompt, previous_messages=conversation
@@ -362,8 +363,8 @@ class OpenAIService:
         try:
             system_prompt = """ 
                             Summarize the conversation between the user and the AI agent. 
-                            Return a summary of the conversation. You only need to respond with conversation main points no need to include any contact details/address/visit date or time. If email is available please include that.
-                            I only need one or two main points of the conversation.
+                            Return a summary of the conversation. You only need to respond with specific conversation one liner no need to include any contact details/address/visit date or time. If email is available please include that.
+                            I only need one liner summary  the conversation.
                             """
             response = await self.get_gpt_response_with_history(
                 prompt="Generate Summary", system_prompt=system_prompt, previous_messages=conversation
