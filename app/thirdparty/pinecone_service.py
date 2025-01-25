@@ -15,6 +15,15 @@ class PineConeDBService:
             api_key=constants.PINECONEDB_API_KEY,
         )
 
+    def reinitialize_pinecone_client(self):
+        """
+        Reinitialize the Pinecone client with the API key from the constants file.
+        """
+        self.pinecone_client = Pinecone(
+            api_key=constants.PINECONEDB_API_KEY,
+        )
+        logger.info("Pinecone client reinitialized.")
+
     async def test_connection(self):
         """
         Test the Pinecone DB connection by listing indexes or checking API reachability.
@@ -111,7 +120,7 @@ class PineConeDBService:
             )
             return {"status_code": 500, "response": str(e)}
 
-    async def query_data(self, query_text, top_k=3, index_name=None):
+    async def query_data(self, query_text, top_k=3, index_name=None,  retry_count=0, max_retries=5):
         """
         Query the specified Pinecone index using a text query.
         Args:
@@ -139,6 +148,13 @@ class PineConeDBService:
             return {"status_code": 404, "response": "No matching records found."}
         except Exception as e:
             logger.error(f"Failed to query index {constants.PINECONE_INDEX}: {e}")
+            if "Max retries exceeded with url" in str(e):
+                if retry_count < max_retries:
+                    logger.info(f"Retrying query_data... Attempt {retry_count + 1}/{max_retries}")
+                    self.reinitialize_pinecone_client()
+                    return await self.query_data(query_text, top_k, index_name, retry_count + 1, max_retries)
+                else:
+                    logger.error("Max retries reached. Query failed.")
             return {"status_code": 500, "response": str(e)}
 
     async def _generate_embedding(self, text):
