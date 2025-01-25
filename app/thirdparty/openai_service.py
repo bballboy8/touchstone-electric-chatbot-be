@@ -332,8 +332,9 @@ class OpenAIService:
                             Summarize the conversation between the user and the AI agent. 
                             Return a summary of the conversation and reason for visit. You only need to respond with conversation main points no need to include any contact details/address/visit date or time. If email is available please include that. Keep it very concise.
                             """
+            previous_messages = await self.truncate_conversation_list_till_last_request_registered(conversation)
             response = await self.get_gpt_response_with_history(
-                prompt="Generate concise Summary", system_prompt=system_prompt, previous_messages=conversation
+                prompt="Generate concise Summary", system_prompt=system_prompt, previous_messages=previous_messages
             )
             return response
         except Exception as e:
@@ -342,13 +343,25 @@ class OpenAIService:
                 "status_code": 500,
             }
         
+    async def truncate_conversation_list_till_last_request_registered(self, conversation: list):
+        try:
+            final_list = []
+            for i, message in enumerate(conversation):
+                if "Request Registered:" in message:
+                    final_list = conversation[i+1:]
+                    break
+            return final_list
+        except Exception as e:
+            return conversation
+        
     async def get_conversation_bullets(self, conversation: list):
         try:
             system_prompt = """ 
                             Based on provided context return the reason of conversation. Keep it very concise. No need to include time and date. Just a simple text of what is the reason.
                             """
+            previous_messages = await self.truncate_conversation_list_till_last_request_registered(conversation)
             response = await self.get_gpt_response_with_history(
-                prompt="As per the users conversation with bot what fix he is looking for, answer in one line", system_prompt=system_prompt, previous_messages=conversation
+                prompt="As per the users conversation with bot what fix he is looking for, answer in one line", system_prompt=system_prompt, previous_messages=previous_messages
             )
             return response
         except Exception as e:
@@ -365,8 +378,9 @@ class OpenAIService:
                             I only need one or two main points of the conversation.
                             You need summarize after the last Request Registered. If none is there then summarize the whole conversation in one or two points.
                             """
+            previous_messages = await self.truncate_conversation_list_till_last_request_registered(conversation)
             response = await self.get_gpt_response_with_history(
-                prompt="Generate Summary", system_prompt=system_prompt, previous_messages=conversation
+                prompt="Generate Summary", system_prompt=system_prompt, previous_messages=previous_messages
             )
             return response
         except Exception as e:
@@ -393,7 +407,7 @@ class OpenAIService:
             """
             user_details = "USER DETAILS: \n" + user_details.replace("mobilephone", "phone")
             system_prompt = system_prompt.replace("USER DETAILS", user_details)
-            print(system_prompt, "system_prompt")
+
             response = await self.get_gpt_response_with_history(
                 prompt=query,
                 system_prompt=system_prompt,
