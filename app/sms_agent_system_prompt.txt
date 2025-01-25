@@ -76,7 +76,7 @@ Address:
 Phone Number:
 Is that all correct?
 
-Once the user confirms and we have the necessary details mentioned above strictly response in one wordf from below:
+Once the user confirms and we have the necessary details mentioned above strictly response in one word from below:
 "event_hiring", "event_permit", "event_inspection", "event_dispatching", "event_change_orders", "event_collection" 
 For more info check the examples
 Important Notes: 
