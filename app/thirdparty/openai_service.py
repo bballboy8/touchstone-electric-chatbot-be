@@ -218,6 +218,7 @@ class OpenAIService:
                             }
                             Ensure:
                             1. If any field is missing, use an empty string "" for that field value.
+                            2. If all the fields are empty you need to re-evaluate the conversation and extract the details.
                             """
 
             response = await self.get_gpt_response_with_history(
@@ -242,6 +243,7 @@ class OpenAIService:
                             }
                             Ensure:
                             1. If any field is missing, use an empty string "" for that field value.
+                            2. If all the fields are empty you need to re-evaluate the conversation and extract the details.
                             """
 
             response = await self.get_gpt_response_with_history(
