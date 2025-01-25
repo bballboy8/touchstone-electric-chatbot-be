@@ -57,12 +57,14 @@ async def get_users_previous_messages_history_of_last_30_days(msisdn, recent_fil
         created_at = await get_users_recent_conversations_from_db(msisdn)
         vonage_webhooks_collection = db[constants.VONAGE_WEBHOOKS_COLLECTION]
         query = {"msisdn": msisdn, "source": "inbound_sms"}
+        print(created_at, recent_filter) 
         if created_at and recent_filter:
-            query["created_at"] = {"$gte": created_at}
+            query["created_at"] = {"$gt": created_at}
         else:
             query["created_at"] = {"$gte": datetime.now() - timedelta(days=7)}
         history = await vonage_webhooks_collection.find(query, {'query':1, 'response':1, 'messageId':1, "_id":0, "created_at":1}).to_list(length=None)
         formatted_response = await db_output_formatter_to_openai_format(list(history))
+        print(len(formatted_response), "formatted_response", formatted_response)
         return {"status_code": 200, "data": formatted_response}
     except Exception as e:
         logger.error(f"Error in get_users_previous_messages_history_of_last_30_days: {e}")
@@ -163,11 +165,13 @@ async def inbound_sms(request):
 
         # get users previous messages history of last 30 days
         msisdn = request["msisdn"]
-        history_response = await get_users_previous_messages_history_of_last_30_days(msisdn)
+        history_response = await get_users_previous_messages_history_of_last_30_days(msisdn, True)
 
         if history_response["status_code"] != 200:
             logger.error(f"Error in inbound_sms: {history_response['data']}")
             history_response = {"data": []}
+
+        print(len(history_response["data"]), "history_response")
 
         response = await openai_client.generate_sms_agent_response_with_history(
             context=context, query=query, previous_messages=history_response["data"], user_details=user_details["data"]
@@ -180,56 +184,36 @@ async def inbound_sms(request):
 
         print("Initial GPT Response: ", gpt_response)  
 
+        has_event = False
         data = {
             "msisdn": to,
         }
         if "booking_confirm" in gpt_response:
-            history_response = await get_users_previous_messages_history_of_last_30_days(msisdn, recent_filter=True)
-
-            if history_response["status_code"] != 200:
-                logger.error(f"Error in inbound_sms: {history_response['data']}")
-                history_response = {"data": []}
-
             response = await train_agent_service.execute_booking_intent(query, history_response["data"], 'SMS')
-            gpt_response = response["response"]
-            data["created_at"] = datetime.now()
             data["event"] = "booking_confirm"
-            users_registered_requests_collection.insert_one(data)
-            print("Final GPT Response : ", gpt_response)
+            has_event = True
         
         elif "event_hiring" in gpt_response:
-            history_response = await get_users_previous_messages_history_of_last_30_days(msisdn, recent_filter=True)
-
-            if history_response["status_code"] != 200:
-                logger.error(f"Error in inbound_sms: {history_response['data']}")
-                history_response = {"data": []}
-
             response = await train_agent_service.execute_hiring_intent(query, history_response["data"], 'SMS')
-            gpt_response = response["response"]
-            data["created_at"] = datetime.now()
             data["event"] = "event_hiring"
-            users_registered_requests_collection.insert_one(data)
-            print("Final GPT Response : ", gpt_response)
+            has_event = True
         else:
             event_list = [
                 "event_change_orders", "event_new_lead", "event_permit", "event_inspection", "event_collection", "event_dispatching"
             ]
             for event in event_list:
                 if event in gpt_response:
-                    history_response = await get_users_previous_messages_history_of_last_30_days(msisdn, recent_filter=True)
-
-                    if history_response["status_code"] != 200:
-                        logger.error(f"Error in inbound_sms: {history_response['data']}")
-                        history_response = {"data": []}
-
                     response = await train_agent_service.execute_intent(query, history_response["data"], event, 'SMS')
-                    gpt_response = response["response"]
-                    data["created_at"] = datetime.now()
                     data["event"] = event
-                    users_registered_requests_collection.insert_one(data)
-                    print("Final GPT Response : ", gpt_response)
+                    has_event = True
                     break
-
+        
+        if has_event:
+            gpt_response = response["response"]
+            data["created_at"] = request["created_at"]
+            users_registered_requests_collection.insert_one(data)
+        
+        print("Final GPT Response : ", gpt_response)
 
         request["response"] = gpt_response
         vonage_webhooks_collection.insert_one(request)
