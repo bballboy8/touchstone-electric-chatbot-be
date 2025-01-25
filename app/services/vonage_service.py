@@ -164,11 +164,13 @@ async def inbound_sms(request):
         if "booking_confirm" in gpt_response:
             response = await train_agent_service.execute_booking_intent(query, history_response["data"], 'SMS')
             gpt_response = response["response"]
+            gpt_response= "Request Registered: "+ gpt_response
             print("Final GPT Response : ", gpt_response)
         
         elif "event_hiring" in gpt_response:
             response = await train_agent_service.execute_hiring_intent(query, history_response["data"], 'SMS')
             gpt_response = response["response"]
+            gpt_response= "Request Registered: "+ gpt_response
             print("Final GPT Response : ", gpt_response)
         else:
             event_list = [
@@ -178,6 +180,7 @@ async def inbound_sms(request):
                 if event in gpt_response:
                     response = await train_agent_service.execute_intent(query, history_response["data"], event, 'SMS')
                     gpt_response = response["response"]
+                    gpt_response= "Request Registered: "+ gpt_response
                     print("Final GPT Response : ", gpt_response)
                     break
 
@@ -188,7 +191,7 @@ async def inbound_sms(request):
         if channel == "sms":
             logger.info("Sending SMS message")
             if constants.DEBUG:return
-            response = vonage_api.send_sms(to, gpt_response)
+            response = vonage_api.send_sms(to, request["response"].replace("Request Registered: ",""))
 
         logger.info("Returning from Inbound SMS service")
         return {"status_code": 200, "data": "Inbound SMS service"}

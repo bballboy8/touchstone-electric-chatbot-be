@@ -75,7 +75,7 @@ async def send_message_to_channel(message: str, channel:str):
         return {"status": "error", "message": str(e)}
     
 async def send_block_to_channel(blocks: list, channel:str):
-    logger.debug("Inside send block to dispatch channel controller")
+    logger.debug(f"Inside send block to {channel} channel controller")
     try:
         slack_instance = SlackServiceAPI()
         response = await slack_instance.send_message_block(blocks=blocks, channel=channel)
@@ -83,5 +83,5 @@ async def send_block_to_channel(blocks: list, channel:str):
     except Exception as e:
         import traceback
         traceback.print_exc()
-        logger.error(f"Error in send_block_to_dispatch_channel: {str(e)}")
+        logger.error(f"Error in {channel} channel controller: {str(e)}")
         return {"status": "error", "message": str(e)}

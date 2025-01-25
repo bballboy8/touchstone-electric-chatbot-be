@@ -362,6 +362,8 @@ class OpenAIService:
             system_prompt = """ 
                             Summarize the conversation between the user and the AI agent. 
                             Return a summary of the conversation. You only need to respond with conversation main points no need to include any contact details/address/visit date or time. If email is available please include that.
+                            I only need one or two main points of the conversation.
+                            You need summarize after the last Request Registered. If none is there then summarize the whole conversation in one or two points.
                             """
             response = await self.get_gpt_response_with_history(
                 prompt="Generate Summary", system_prompt=system_prompt, previous_messages=conversation

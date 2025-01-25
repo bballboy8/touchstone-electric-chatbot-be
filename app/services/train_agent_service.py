@@ -241,8 +241,6 @@ async def handle_booking_request(user_query: str, conversation_summary: str = No
 
         json_data = booking_data["raw_data"]
         booking_data = booking_data["data"]
-        if constants.DEBUG:
-            return {"message": "Booking request created successfully", "status_code": 200, "response": json_data, "booking_data": json_data}
         response = await create_booking_request(booking_data, conversation_summary)
         if response["status_code"] != 200:
             return response
@@ -475,7 +473,7 @@ async def execute_intent(query: str, previous_messages: list, event_name: str, s
         logger.debug(f"Extracted user details in json format: {json_data}")
         customer_data = json_data
 
-        logger.debug("Sending message to dispatching channel")
+        logger.debug(f"Sending message to {event_name} channel")
         blocks = [
                 {
                 "type": "section",
@@ -508,7 +506,7 @@ async def execute_intent(query: str, previous_messages: list, event_name: str, s
         )
         # print(f"Message sent to {event_name.replace("event_", "")} {channel} channel")
         return {
-            "response": f"Awesome, we're working on this now! We will call you shortly to discuss your needs.",
+            "response": f"We're working on this now! We will call you shortly to discuss your request.",
             "status_code": 200,
         }
     except Exception as e:
