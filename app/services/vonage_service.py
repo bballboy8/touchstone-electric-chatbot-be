@@ -193,6 +193,7 @@ async def inbound_sms(request):
             response = await train_agent_service.execute_booking_intent(query, history_response["data"], 'SMS')
             gpt_response = response["response"]
             data["created_at"] = datetime.now()
+            data["event"] = "booking_confirm"
             users_registered_requests_collection.insert_one(data)
             print("Final GPT Response : ", gpt_response)
         
@@ -206,6 +207,7 @@ async def inbound_sms(request):
             response = await train_agent_service.execute_hiring_intent(query, history_response["data"], 'SMS')
             gpt_response = response["response"]
             data["created_at"] = datetime.now()
+            data["event"] = "event_hiring"
             users_registered_requests_collection.insert_one(data)
             print("Final GPT Response : ", gpt_response)
         else:
@@ -223,6 +225,7 @@ async def inbound_sms(request):
                     response = await train_agent_service.execute_intent(query, history_response["data"], event, 'SMS')
                     gpt_response = response["response"]
                     data["created_at"] = datetime.now()
+                    data["event"] = event
                     users_registered_requests_collection.insert_one(data)
                     print("Final GPT Response : ", gpt_response)
                     break
