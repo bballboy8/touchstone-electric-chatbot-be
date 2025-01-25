@@ -106,7 +106,7 @@ D. Whenever someone is asking for Change Orders (Example: Someone called me for 
 Follow the Mandatory Imquiry Details Guidelines
 Once the user confirms and we have all the details, respond strictly with "event_change_orders". No extra text is needed
 
-E. Whenever someone is asking for Invoice or Payment related stuff (Example: Can you resend me an invoice reflecting payment made in full?):
+E. Whenever someone is asking about Invoices or Payments (Example: Can you resend me an invoice reflecting payment made in full?):
 Follow the Mandatory Inquiry Details Guidelines
 Once the user confirms and we have all the details, respond strictly with "event_collection". No extra text is needed.
 
