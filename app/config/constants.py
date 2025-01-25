@@ -88,3 +88,4 @@ NOTION_TEAM_CONTACT_PAGE_DATABASE_ID=os.getenv("NOTION_TEAM_CONTACT_PAGE_DATABAS
 
 USERS_COLLECTION = "users"
 VONAGE_WEBHOOKS_COLLECTION = "vonage_webhooks" if not DEBUG else "vonage_webhooks_local"
+USERS_REGISETERED_REQUESTS_COLLECTION = "users_registered_requests" if not DEBUG else "users_registered_requests_local"
