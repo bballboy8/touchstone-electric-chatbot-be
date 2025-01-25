@@ -6,6 +6,7 @@ from fastapi import UploadFile, File
 from datetime import datetime
 import pytz
 import time
+from db_connection import db
 
 def convert_to_est(epoch_time, format_date=True):
     """
@@ -287,10 +288,10 @@ class OpenAIService:
         try:
             logger.info("Sending prompt to OpenAI GPT API...")
             messages = [
-                {"role": "system", "content": system_prompt},
+                {"role": "developer", "content": [{"type": "text", "text": system_prompt}]},
             ]
             messages += previous_messages
-            messages.append({"role": "user", "content": prompt})
+            messages.append({"role": "user", "content": [{"type": "text", "text": prompt}]})
 
 
 
@@ -332,9 +333,8 @@ class OpenAIService:
                             Summarize the conversation between the user and the AI agent. 
                             Return a summary of the conversation and reason for visit. You only need to respond with conversation main points no need to include any contact details/address/visit date or time. If email is available please include that. Keep it very concise.
                             """
-            previous_messages = await self.truncate_conversation_list_till_last_request_registered(conversation)
             response = await self.get_gpt_response_with_history(
-                prompt="Generate concise Summary", system_prompt=system_prompt, previous_messages=previous_messages
+                prompt="Generate concise Summary", system_prompt=system_prompt, previous_messages=conversation
             )
             return response
         except Exception as e:
@@ -343,25 +343,13 @@ class OpenAIService:
                 "status_code": 500,
             }
         
-    async def truncate_conversation_list_till_last_request_registered(self, conversation: list):
-        try:
-            final_list = []
-            for i, message in enumerate(conversation):
-                if "Request Registered:" in message:
-                    final_list = conversation[i+1:]
-                    break
-            return final_list
-        except Exception as e:
-            return conversation
-        
     async def get_conversation_bullets(self, conversation: list):
         try:
             system_prompt = """ 
                             Based on provided context return the reason of conversation. Keep it very concise. No need to include time and date. Just a simple text of what is the reason.
                             """
-            previous_messages = await self.truncate_conversation_list_till_last_request_registered(conversation)
             response = await self.get_gpt_response_with_history(
-                prompt="As per the users conversation with bot what fix he is looking for, answer in one line", system_prompt=system_prompt, previous_messages=previous_messages
+                prompt="As per the users conversation with bot what fix he is looking for, answer in one line", system_prompt=system_prompt, previous_messages=conversation
             )
             return response
         except Exception as e:
@@ -376,11 +364,9 @@ class OpenAIService:
                             Summarize the conversation between the user and the AI agent. 
                             Return a summary of the conversation. You only need to respond with conversation main points no need to include any contact details/address/visit date or time. If email is available please include that.
                             I only need one or two main points of the conversation.
-                            You need summarize after the last Request Registered. If none is there then summarize the whole conversation in one or two points.
                             """
-            previous_messages = await self.truncate_conversation_list_till_last_request_registered(conversation)
             response = await self.get_gpt_response_with_history(
-                prompt="Generate Summary", system_prompt=system_prompt, previous_messages=previous_messages
+                prompt="Generate Summary", system_prompt=system_prompt, previous_messages=conversation
             )
             return response
         except Exception as e:

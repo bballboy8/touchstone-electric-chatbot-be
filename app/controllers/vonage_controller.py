@@ -43,9 +43,9 @@ async def sms_status(request: Request, background_tasks: BackgroundTasks):
 @router.get(
     "/get-users-previous-messages-history-of-last-30-days",
 )
-async def get_users_previous_messages_history_of_last_30_days(msisdn: str):
+async def get_users_previous_messages_history_of_last_30_days(msisdn: str, recent_filter: bool):
     logger.debug("Inside Get Users Previous Messages History of Last 30 Days controller")
-    response = await services.get_users_previous_messages_history_of_last_30_days(msisdn)
+    response = await services.get_users_previous_messages_history_of_last_30_days(msisdn,recent_filter)
     logger.debug("Response from Get Users Previous Messages History of Last 30 Days controller")
     return JSONResponse(status_code=response["status_code"], content=response["data"])
 
