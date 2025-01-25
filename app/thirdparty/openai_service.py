@@ -379,7 +379,6 @@ class OpenAIService:
     async def generate_sms_agent_response_with_history(
         self, context: str, query: str, previous_messages: list, user_details: str
     ):
-        print("Final User Infor", user_details)
         try:
             system_prompt = await self.get_system_prompt_for_sms_agent(context)
             if system_prompt.get("status_code") != 200:

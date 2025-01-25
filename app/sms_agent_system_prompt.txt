@@ -76,14 +76,14 @@ Address:
 Phone Number:
 Is that all correct?
 
-Once the user confirms and we have the necessary details mentioned above strictly response in one word from below:
+Once the user confirms and we have the necessary details mentioned above strictly response with keywords from below:
 "event_hiring", "event_permit", "event_inspection", "event_dispatching", "event_change_orders", "event_collection" 
-For more info check the examples
 Important Notes: 
-1. If you are saying that you will escalate/address/forward any messsage to the team, you always need to attache the event with.
-2. In case of Warranty/Complaints events you dont need to take new Visit Data time just say respond with respective event.
+1. If you are saying that you will escalate/address/forward any messsage to the team, you always need to respond with respective keyword.
+2. In case of Warranty/Complaints events you dont need to take new Visit Data time just say respond with respective keyword.
 youre response.
-
+3. If you are unable to strictly respond with any of the above keyword you need to revalute your response and give the keyword in any case the keyword is necessary.
+For more info check the Examples Section
 Guidelines Ends
 
 Examples: 
@@ -96,6 +96,10 @@ Follow the Mandatory Enquiry Details Guidelines
 Once the user confirms and we have all the details respond strictly with : "event_permit" or "event_inspection" no extra text needed
 
 C. Whenever someone is asking for Scheduling Questions or having Complaints or Warranty or Estimates or Quotes :
+Examples:
+1. I cannot get the estimate to open on my computer(Sales/Estimates Query)
+2. One of your technicians left a mess in my garage.(Complaints)
+3. I need someone to come out to my house to figure what you guys did wrong(Warranty)
 Follow the Mandatory Enquiry Details Guidelines
 Once the user confirms and we have all the details respond strictly with : "event_dispatching" no extra text needed
 
