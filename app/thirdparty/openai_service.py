@@ -407,7 +407,6 @@ class OpenAIService:
             """
             user_details = "USER DETAILS: \n" + user_details.replace("mobilephone", "phone")
             system_prompt = system_prompt.replace("USER DETAILS", user_details)
-
             response = await self.get_gpt_response_with_history(
                 prompt=query,
                 system_prompt=system_prompt,
