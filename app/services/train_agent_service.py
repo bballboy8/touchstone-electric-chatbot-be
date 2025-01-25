@@ -413,6 +413,7 @@ async def execute_booking_intent(query: str, previous_messages: list, source="we
             return response
 
         booking_data = response["booking_data"]
+        print(summary, "Summary")
 
         logger.debug("Sending message to dispatching channel")
         blocks = [
@@ -462,7 +463,7 @@ async def execute_intent(query: str, previous_messages: list, event_name: str, s
                     previous_messages
                 )
         summary = conversation_summary["response"]
-
+        print(summary, "Summary")
         response = await openai_client.extract_user_basic_details(query, previous_messages)
         if response["status_code"] != 200:
             return response
@@ -523,7 +524,7 @@ async def execute_hiring_intent(query: str, previous_messages: list, source="web
                     previous_messages
                 )
         summary = conversation_summary["response"]
-
+        print(summary, "Summary")
         response = await openai_client.extract_user_basic_details(query, previous_messages)
         if response["status_code"] != 200:
             return response
