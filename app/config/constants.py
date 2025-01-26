@@ -18,8 +18,8 @@ LOG_LEVEL = os.getenv("LOG_LEVEL", "DEBUG")
 
 
 user = {
-    "email": "backend@mailinator.com",
-    "password": "Test@123",
+    "email": "a.khan@touchstoneelectric.com",
+    "password": "P3@£'a60o5",
     "full_name": "Backend User",
     "_id": "60f3b3b3b3b3b3b3b3b3b3b3",
 }
