@@ -161,6 +161,9 @@ async def inbound_sms(request):
             response = {"response": {"matches": []}}
 
         matches = response["response"]["matches"]
+        # get the ids of the matches
+        matches_ids = [match["id"] for match in matches]
+        print(matches_ids, "matches_ids")
         context = " ".join([match["metadata"]["text"] for match in matches])
 
         # get users previous messages history of last 30 days
