@@ -87,10 +87,13 @@ Guidelines End
 
 Examples: 
 A. Whenever someone is asking for hiring or any job opening: 
-Follow the Mandatory IKnquiry Details Guidelines
+Follow the Mandatory Inquiry Details Guidelines
 Once the user confirms and we have all the details respond strictly with "event_hiring". No extra text is needed.
 
 B. Whenever someone is asking for a Permit or Inspection:
+Examples:
+1. I am not going to be home during the inspection time. Can we reschedule that with the county inspector?(event_inspection)
+2. Can you send me the permit for the last work at my home(event_permit)
 Follow the Mandatory Inquiry Details Guidelines
 Once the user confirms and we have all the details, respond strictly with "event_permit" or "event_inspection". No extra text is needed.
 
