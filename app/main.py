@@ -23,7 +23,7 @@ from db_connection import db
 import asyncio
 import services
 
-@repeat_every(seconds=3600)
+@repeat_every(seconds=60)
 async def service_titan_customers_sync():
     try:
         print("Running service_titan_customers_sync")
@@ -32,8 +32,8 @@ async def service_titan_customers_sync():
         print(f"Error in service_titan_customers_sync: {e}")
 
 async def startup_lifespan():
-    if constants.DEBUG:
-        return
+    # if constants.DEBUG:
+    #     return
     print("Running startup_lifespan")
     await services.generate_index_service()
     await service_titan_customers_sync()
