@@ -232,7 +232,8 @@ async def inbound_sms(request):
                 response = await text_campaign_service.send_completed_job_alert_sms({'text': request['text']})
                 if response["status_code"] != 200:
                     logger.error(f"Error in sending completed job alert SMS: {response['data']}")
-                customer_id = response["customer_id"]
+                else:
+                    customer_id = response["customer_id"]
             except Exception as e:
                 logger.error(f"Error while creating completed job alert : {e}")
 
