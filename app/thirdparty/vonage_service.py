@@ -13,7 +13,7 @@ class VonageApi:
             )
         )
 
-    def send_sms(self, to, text):
+    def send_sms(self, to, text, message_type="text"):
         try:
             logger.info(f"Sending SMS to {to} with text: {text}")
             response = self.vonage_client.messages.send(
@@ -21,6 +21,7 @@ class VonageApi:
                     to=to,
                     from_=constants.VONAGE_FROM_NUMBER,
                     text=text,
+                    message_type=message_type,
                 )
             )
 
