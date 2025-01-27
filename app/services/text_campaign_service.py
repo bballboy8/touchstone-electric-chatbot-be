@@ -149,7 +149,7 @@ async def send_text_message_via_trigger(trigger_id):
         if not user_message:
             return {"status_code": 404, "data": "User Message not found"}
         
-        number = user_message["number"]
+        customer_id = user_message["customer_id"]
         message = user_message["message"]
         vonage_api = VonageApi()
         response = vonage_api.send_sms("919993227728", message, "text")
@@ -161,7 +161,7 @@ async def send_text_message_via_trigger(trigger_id):
 
         return {
             "status_code": 200,
-            "data": f"SMS Sent Successfully to {number} with message id: {response['data']}",
+            "data": f"SMS Sent Successfully to {customer_id} with message id: {response['data']}",
         }
     except Exception as e:
         logger.error(f"Error in send_text_message_via_trigger: {e}")
