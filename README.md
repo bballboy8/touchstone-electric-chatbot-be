@@ -1,6 +1,6 @@
 # touchstone-electric-chatbot-be
 
-# FastAPI Touchstone Electric ChatBot - Philip
+# FastAPI Touchstone Electric ChatBot
 
 This project is built using Python and requires Docker to run. It utilizes UVicorn as the ASGI server.
 
