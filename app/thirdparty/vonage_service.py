@@ -16,6 +16,7 @@ class VonageApi:
     def send_sms(self, to, text, message_type="text"):
         try:
             logger.info(f"Sending SMS to {to} with text: {text}")
+            if constants.DEBUG: return {"status_code": 200, "data": "DEBUG MODE: SMS not sent"}
             response = self.vonage_client.messages.send(
                 Sms(
                     to=to,
