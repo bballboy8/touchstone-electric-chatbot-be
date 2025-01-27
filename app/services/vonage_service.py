@@ -227,18 +227,21 @@ async def inbound_sms(request):
             logger.info("User not found in the database")
             return {"status_code": 200, "data": "User not found in the database"}
 
-        customer_id = user_details["service_titan_id"]        
-        is_job, user = text_campaign_service.extract_job_info(request["text"])
-        if is_job:
+        customer_id = ""
+        job_id, user = text_campaign_service.extract_job_info(request["text"])
+        if job_id:
             logger.info("Sending Completed Job Alert SMS")
             try:
-                await text_campaign_service.send_completed_job_alert_sms({'text': request['text']})
+                response = await text_campaign_service.send_completed_job_alert_sms({'text': request['text']})
+                if response["status_code"] != 200:
+                    logger.error(f"Error in sending completed job alert SMS: {response['data']}")
+                customer_id = user_details["customer_id"]
             except Exception as e:
                 logger.error(f"Error while creating completed job alert : {e}")
 
         filter_query = {"customer_id": customer_id, "status": "pending", "type": "google_review", "expires_at": {"$gte": datetime.now(pytz.utc)}}
         response = await users_campaign_messages_collection.find(filter_query).to_list(length=None)
-        if response and not is_job:
+        if response and not job_id:
             for campaign in response:
                 await users_campaign_messages_collection.update_one({"_id": campaign["_id"]}, {"$set": {"status": "user_responded"}})
             logger.info("User responded to google reviews campaign")

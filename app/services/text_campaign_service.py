@@ -135,7 +135,7 @@ async def send_completed_job_alert_sms(data):
             }
             await users_campaign_messages_collection.insert_one(user_message)
             logger.debug(f"Message Request Trigger added with ID: {trigger_id}")
-        return {"status_code": 200, "data": f"Message Triggered with ID: {trigger_id}"}
+        return {"status_code": 200, "data": f"Message Triggered with ID: {trigger_id}" , "customer_id": customer_id}
     except Exception as e:
         import traceback
         traceback.print_exc()
