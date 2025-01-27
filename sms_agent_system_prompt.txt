@@ -114,3 +114,4 @@ Follow the Mandatory Inquiry Details Guidelines
 Once the user confirms and we have all the details, respond strictly with "event_collection". No extra text is needed.
 
 Examples End
+
