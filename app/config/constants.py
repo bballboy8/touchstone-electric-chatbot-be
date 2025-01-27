@@ -87,5 +87,7 @@ NOTION_TEAM_CONTACT_PAGE_DATABASE_ID=os.getenv("NOTION_TEAM_CONTACT_PAGE_DATABAS
 # Mongodb Collections
 
 USERS_COLLECTION = "users"
-VONAGE_WEBHOOKS_COLLECTION = "vonage_webhooks" if not DEBUG else "vonage_webhooks_local"
-USERS_REGISETERED_REQUESTS_COLLECTION = "users_registered_requests" if not DEBUG else "users_registered_requests_local"
+VONAGE_WEBHOOKS_COLLECTION = "vonage_webhooks"
+USERS_REGISETERED_REQUESTS_COLLECTION = "users_registered_requests"
+USERS_MESSAGE_TRIGGER_REQUESTS_COLLECTION = "users_message_trigger_requests"
+USERS_CAMPAIGN_MESSAGES_COLLECTION = "users_campaign_messages"

@@ -385,3 +385,20 @@ class ServiceTitanApiService:
             return {"status_code": 200, "data": response.json()}
         except Exception as e:
             return {"status_code": 500, "data": f"Internal server error: {e}"}
+        
+    async def get_job_by_id(self, job_id):
+        try:
+            response = await self._get_access_token()
+            if response["status_code"] != 200:
+                return response
+            access_token = response["data"]["access_token"]
+            url = f"{self.api_url}/jpm/v2/tenant/{self.tenant_id}/jobs/{job_id}"
+            headers = {
+                "Authorization": access_token,
+                "ST-App-Key": self.app_key,
+            }
+            response = requests.get(url, headers=headers)
+            response.raise_for_status()
+            return {"status_code": 200, "data": response.json()}
+        except Exception as e:
+            return {"status_code": 500, "data": f"Internal server error: {e}"}

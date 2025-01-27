@@ -19,6 +19,9 @@ from routers import (
 import services
 from fastapi_utils.tasks import repeat_every
 from config import constants
+from db_connection import db
+import asyncio
+import services
 
 @repeat_every(seconds=3600)
 async def service_titan_customers_sync():
@@ -80,3 +83,10 @@ project.include_router(text_campaign_router.router, prefix="/api", tags=["Text C
 
 
 
+async def monitor_changes():
+    change_stream = db[constants.USERS_MESSAGE_TRIGGER_REQUESTS_COLLECTION].watch([{'$match': {'operationType': 'delete'}}])
+    async for change in change_stream:
+        reference_id = change['documentKey']['_id']
+        await services.send_text_message_via_trigger(reference_id)
+
+asyncio.create_task(monitor_changes())
