@@ -249,7 +249,7 @@ async def inbound_sms(request):
         if channel == "sms":
             logger.info("Sending SMS message")
             if constants.DEBUG:return
-            response = vonage_api.send_sms(to, request["response"])
+            # response = vonage_api.send_sms(to, request["response"])
 
         logger.info("Returning from Inbound SMS service")
         return {"status_code": 200, "data": "Inbound SMS service"}
