@@ -54,6 +54,8 @@ async def db_output_formatter_to_openai_format(messages:list):
 
 async def get_users_previous_messages_history_of_last_30_days(msisdn, recent_filter=False):
     try:
+        if msisdn == "18336421855":
+            return {"status_code": 200, "data": []}
         created_at = await get_users_recent_conversations_from_db(msisdn)
         vonage_webhooks_collection = db[constants.VONAGE_WEBHOOKS_COLLECTION]
         query = {"msisdn": msisdn, "source": "inbound_sms"}
