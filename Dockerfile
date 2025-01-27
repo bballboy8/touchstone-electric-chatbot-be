@@ -8,6 +8,7 @@ COPY . /app
 
 # Install dependencies
 # RUN pip install --no-cache-dir -r requirements.txt
+RUN apt-get update && apt-get install -y ca-certificates
 RUN pip install -r requirements.txt
 RUN python -c "import nltk; nltk.download('punkt'); nltk.download('punkt_tab')"
 
