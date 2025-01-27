@@ -218,6 +218,10 @@ async def associate_user_contacts_threaded(user_list, contact_list, tag_list):
 async def export_all_customers_data_from_service_titan():
     logger.info("Exporting all customers from Service Titan")
     try:
+        if constants.DEBUG:
+            logger.info("Debug Mode: Skipping Export All Customers Data")
+            return {"status_code": 200, "data": "Debug Mode: Skipping Export All Customers Data"}
+        
         start_time = time.time()
         logger.debug("Exporting all customers from Service Titan")
         service_titan_api_service = ServiceTitanApiService()

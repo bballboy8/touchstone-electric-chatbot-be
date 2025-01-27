@@ -6,6 +6,9 @@ import blueprints
 
 async def generate_index_service():
     try:
+        if constants.DEBUG:
+            logger.info("Debug Mode: Skipping Index Creation")
+            return
         pinecone = PineConeDBService()
         await pinecone.create_index(constants.PINECONE_INDEX)
         logger.info("Generate Index Service Executed")
