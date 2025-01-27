@@ -27,7 +27,8 @@ import services
 async def service_titan_customers_sync():
     try:
         print("Running service_titan_customers_sync")
-        await services.export_all_customers_data_from_service_titan()
+        response = await services.export_all_customers_data_from_service_titan()
+        print(response)
     except Exception as e:
         print(f"Error in service_titan_customers_sync: {e}")
 

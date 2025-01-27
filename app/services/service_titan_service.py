@@ -276,6 +276,8 @@ async def export_all_customers_data_from_service_titan():
             },
         }
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         logger.error(f"Error exporting all customers from Service Titan: {e}")
         return {"status_code": 500, "data": f"Internal server error:{e}"}
 
