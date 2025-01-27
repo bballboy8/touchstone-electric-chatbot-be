@@ -110,26 +110,31 @@ async def send_completed_job_alert_sms(data):
             logger.error("Phone number not found")
             return {"status_code": 500, "data": "Phone number not found"}
 
-        message = f"Hey {user_name},\nThanks for choosing Touchstone Electric!\nWould you be opposed to leaving some feedback on how {technician} did using the link below?\nhttps://g.co/kgs/odtK5fg\nIf you mention {technician} by name in a 5-star review, we will tip him on your behalf!"
+        message_1 = f"Hey {user_name},\nThanks for choosing Touchstone Electric!\nWould you be opposed to leaving some feedback on how {technician} did using the link below?\nhttps://g.co/kgs/odtK5fg\nIf you mention {technician} by name in a 5-star review, we will tip him on your behalf!"
 
-        # expires_at 2 minutes from now
-        expires_at = datetime.now(pytz.utc) + timedelta(minutes=2)
+        message_3 = f"Hi {user_name},\nWe hope that you're still satisfied with {technician}'s performance.\nWere there any issues regarding your experience with #{technician}'s performance?"
+        
+        message_7 = f"Hi {user_name}. Checking in one last time.\nAre you going to be unable to give #{technician} feedback on his performance?"
 
-        trigger_data = {
-            "expires_at": expires_at
-        }
-        trigger_id = await users_message_trigger_requests_collection.insert_one(trigger_data)
+        for i, message in enumerate([message_1, message_3, message_7]):
+            expires_at = datetime.now(pytz.utc) + timedelta(minutes=(i+1)*2)
 
-        user_message = {
-            "trigger_id": trigger_id.inserted_id,
-            "number": number,
-            "message": message,
-            "expires_at": expires_at,
-            "status": "pending",
-        }
-        await users_campaign_messages_collection.insert_one(user_message)
+            trigger_data = {
+                "expires_at": expires_at,
+                "type": "google_review",
+            }
+            trigger_id = await users_message_trigger_requests_collection.insert_one(trigger_data)
 
-        logger.debug(f"Message Request Trigger added with ID: {trigger_id}")
+            user_message = {
+                "trigger_id": trigger_id.inserted_id,
+                "customer_id": customer_id,
+                "message": message,
+                "expires_at": expires_at,
+                "status": "pending",
+                "type": 'google_review'
+            }
+            await users_campaign_messages_collection.insert_one(user_message)
+            logger.debug(f"Message Request Trigger added with ID: {trigger_id}")
         return {"status_code": 200, "data": f"Message Triggered with ID: {trigger_id}"}
     except Exception as e:
         import traceback

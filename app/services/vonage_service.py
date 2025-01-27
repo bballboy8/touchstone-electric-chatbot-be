@@ -7,7 +7,7 @@ from config import constants
 from datetime import datetime
 from datetime import timedelta
 import time
-from services import train_agent_service
+from services import train_agent_service, text_campaign_service
 import pytz
 
 
@@ -95,12 +95,13 @@ async def get_users_details_in_a_text_chunk_from_db(number):
         if not user_details:
             return {"status_code": 200, "data": "Not Available"}
         print(user_details, "user_details")
+        customer_id = user_details["service_titan_id"]
         for key, value in user_details.items():
             if value and key not in ['service_titan_id', 'tag_id']:
                 value = value if isinstance(value, str) else ", ".join(value)
                 formatted_response += f"{key}: {value}\n"
 
-        return {"status_code": 200, "data": formatted_response}
+        return {"status_code": 200, "data": formatted_response, "service_titan_id": customer_id}
     except Exception as e:
         logger.error(f"Error in get_users_details_in_a_text_chunk_from_db: {e}")
         return {"status_code": 500, "data": f"Internal Server Error: {e}"}
@@ -122,6 +123,7 @@ async def inbound_sms(request):
     try:
         vonage_webhooks_collection = db[constants.VONAGE_WEBHOOKS_COLLECTION]
         users_registered_requests_collection = db[constants.USERS_REGISETERED_REQUESTS_COLLECTION]
+        users_campaign_messages_collection = db[constants.USERS_CAMPAIGN_MESSAGES_COLLECTION]
 
         # check if this message request is already registered
         query = {"messageId": request["messageId"]}
@@ -221,6 +223,26 @@ async def inbound_sms(request):
         request["response"] = gpt_response
         vonage_webhooks_collection.insert_one(request)
         
+        if user_details["data"] == "Not Available":
+            logger.info("User not found in the database")
+            return {"status_code": 200, "data": "User not found in the database"}
+
+        customer_id = user_details["service_titan_id"]        
+        is_job, user = text_campaign_service.extract_job_info(request["text"])
+        if is_job:
+            logger.info("Sending Completed Job Alert SMS")
+            try:
+                await text_campaign_service.send_completed_job_alert_sms({'text': request['text']})
+            except Exception as e:
+                logger.error(f"Error while creating completed job alert : {e}")
+
+        filter_query = {"customer_id": customer_id, "status": "pending", "type": "google_review", "expires_at": {"$gte": datetime.now(pytz.utc)}}
+        response = await users_campaign_messages_collection.find(filter_query).to_list(length=None)
+        if response and not is_job:
+            for campaign in response:
+                await users_campaign_messages_collection.update_one({"_id": campaign["_id"]}, {"$set": {"status": "user_responded"}})
+            logger.info("User responded to google reviews campaign")
+
         if channel == "sms":
             logger.info("Sending SMS message")
             if constants.DEBUG:return
