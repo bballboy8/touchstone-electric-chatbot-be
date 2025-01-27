@@ -112,9 +112,9 @@ async def send_completed_job_alert_sms(data):
 
         message_1 = f"Hey {user_name},\nThanks for choosing Touchstone Electric!\nWould you be opposed to leaving some feedback on how {technician} did using the link below?\nhttps://g.co/kgs/odtK5fg\nIf you mention {technician} by name in a 5-star review, we will tip him on your behalf!"
 
-        message_3 = f"Hi {user_name},\nWe hope that you're still satisfied with {technician}'s performance.\nWere there any issues regarding your experience with #{technician}'s performance?"
+        message_3 = f"Hi {user_name},\nWe hope that you're still satisfied with {technician}'s performance.\nWere there any issues regarding your experience with {technician}'s performance?"
         
-        message_7 = f"Hi {user_name}. Checking in one last time.\nAre you going to be unable to give #{technician} feedback on his performance?"
+        message_7 = f"Hi {user_name}. Checking in one last time.\nAre you going to be unable to give {technician} feedback on his performance?"
 
         for i, message in enumerate([message_1, message_3, message_7]):
             expires_at = datetime.now(pytz.utc) + timedelta(minutes=(i+1)*2)
