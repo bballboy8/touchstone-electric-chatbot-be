@@ -1,4 +1,4 @@
-name: Deploy to GCP
+name: Deploy Application
 
 on:
   push:
@@ -10,55 +10,45 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout Repository
+      uses: actions/checkout@v3
 
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v1
-        with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
 
-      - name: Set up Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
+    - name: Install Dependencies
+      run: |
+        python -m venv venv
+        source venv/bin/activate
+        pip install --upgrade pip
+        pip install -r requirements.txt
 
-      - name: Authenticate Docker
-        run: gcloud auth configure-docker us-central1-docker.pkg.dev
+    - name: Configure Environment Variables
+      run: |
+        echo "Creating .env file..."
+        cat <<EOF > .env
+        DB_NAME=${{ secrets.DB_NAME }}
+        DB_USER_NAME=${{ secrets.DB_USER_NAME }}
+        DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+        GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}
+        OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+        # Add the rest of your environment variables here
+        EOF
+        echo ".env file created."
 
-      - name: Build and Push Docker Image
-        env:
-          IMAGE: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/fastapi-app:${{ github.sha }}
-        run: |
-          echo "Docker image to be built and pushed: $IMAGE"
-          docker build \
-            --build-arg OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
-            --build-arg PINECONEDB_API_KEY=${{ secrets.PINECONEDB_API_KEY }} \
-            --build-arg SERVICE_TITAN_TENANT_ID=${{ secrets.SERVICE_TITAN_TENANT_ID }} \
-            --build-arg SERVICE_TITAN_CLIENT_ID=${{ secrets.SERVICE_TITAN_CLIENT_ID }} \
-            --build-arg SERVICE_TITAN_CLIENT_SECRET=${{ secrets.SERVICE_TITAN_CLIENT_SECRET }} \
-            --build-arg SERVICE_TITAN_BASE_AUTH_URL=${{ secrets.SERVICE_TITAN_BASE_AUTH_URL }} \
-            --build-arg SERVICE_TITAN_BASE_API_URL=${{ secrets.SERVICE_TITAN_BASE_API_URL }} \
-            --build-arg SERVICE_TITAN_APP_KEY=${{ secrets.SERVICE_TITAN_APP_KEY }} \
-            --build-arg SERVICE_TITAN_BOOKING_PROVIDER_ID=${{ secrets.SERVICE_TITAN_BOOKING_PROVIDER_ID }} \
-            --build-arg SLACK_BOT_TOKEN=${{ secrets.SLACK_BOT_TOKEN }} \
-            --build-arg SLACK_SIGNING_SECRET=${{ secrets.SLACK_SIGNING_SECRET }} \
-            --build-arg VONAGE_API_KEY=${{ secrets.VONAGE_API_KEY }} \
-            --build-arg VONAGE_API_SECRET=${{ secrets.VONAGE_API_SECRET }} \
-            --build-arg VONAGE_FROM_NUMBER=${{ secrets.VONAGE_FROM_NUMBER }} \
-            --build-arg VONAGE_APPLICATION_ID=${{ secrets.VONAGE_APPLICATION_ID }} \
-            --build-arg NOTION_API_TOKEN=${{ secrets.NOTION_API_TOKEN }} \
-            --build-arg NOTION_TEAM_CONTACT_PAGE_DATABASE_ID=${{ secrets.NOTION_TEAM_CONTACT_PAGE_DATABASE_ID }} \
-            -t $IMAGE .
-          docker push $IMAGE
+    - name: Run Database Migrations
+      run: |
+        source venv/bin/activate
+        python manage.py migrate || echo "No migrations to apply."
 
-      - name: Deploy to Cloud Run
-        env:
-          IMAGE: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/fastapi-app:${{ github.sha }}
-        run: |
-          echo "Deploying image to Cloud Run: $IMAGE"
-          gcloud run deploy fastapi-service \
-            --image $IMAGE \
-            --platform managed \
-            --region us-central1 \
-            --allow-unauthenticated
+    - name: Collect Static Files
+      run: |
+        source venv/bin/activate
+        python manage.py collectstatic --noinput || echo "No static files to collect."
+
+    - name: Start the Application
+      run: |
+        source venv/bin/activate
+        gunicorn app:app --bind 0.0.0.0:8000 --daemon
