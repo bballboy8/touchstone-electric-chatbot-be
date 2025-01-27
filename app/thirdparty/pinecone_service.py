@@ -13,6 +13,7 @@ class PineConeDBService:
         """
         self.pinecone_client = Pinecone(
             api_key=constants.PINECONEDB_API_KEY,
+            ssl_verify=False
         )
 
     def reinitialize_pinecone_client(self):
