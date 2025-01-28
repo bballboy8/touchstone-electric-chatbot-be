@@ -88,3 +88,28 @@ USERS_CAMPAIGN_MESSAGES_COLLECTION = "users_campaign_messages"
 
 # Print MongoDB collection names for debugging
 print(f"MongoDB Collections: {USERS_COLLECTION}, {VONAGE_WEBHOOKS_COLLECTION}, {USERS_REGISETERED_REQUESTS_COLLECTION}, {USERS_MESSAGE_TRIGGER_REQUESTS_COLLECTION}, {USERS_CAMPAIGN_MESSAGES_COLLECTION}")
+
+
+BOOKING_INTENT_CONSTANTS = ["BOOK", "APPOINTMENT", "SCHEDULE", "RESERVE"]
+
+
+dangerous_patterns = [
+    r"(\{|\}|\[|\]|\<|\>|\;|\!|\&|\$|\=|\$)",  # Common dangerous characters like braces, semicolons, etc.
+    r"(exec|eval|import|os\.system|__import__)",  # Malicious Python commands
+    r"ignore[ \t]*previous[ \t]*instructions",  # Attempts to change the model's behavior
+    r"drop\s+database",  # Example of SQL injection attempts
+    r"alert\(",  # Common for JavaScript injection attempts
+    r"document\.location",  # Common JavaScript-based attacks
+]
+
+# Slack Channel Dictionary
+SLACK_CHANNEL_DICT = {
+    "dispatching": "C070C3FEQJ1", #done
+    "permit": "C073V2Q500M", #done
+    "inspection": "C073V2Q500M", #done
+    "human-resources": "C07V5BTT8UC", #done
+    "collection": "C07QLFVK6D6", #done
+    "change_orders": "C08381PAWP3", #done
+    "dev-team": "C080R3ALW3V",
+    "customer-ai-agent-testing": "C083RC1MB09"
+}
