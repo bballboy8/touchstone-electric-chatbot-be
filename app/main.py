@@ -86,6 +86,6 @@ async def monitor_changes():
     change_stream = db[constants.USERS_MESSAGE_TRIGGER_REQUESTS_COLLECTION].watch([{'$match': {'operationType': 'delete'}}])
     async for change in change_stream:
         reference_id = change['documentKey']['_id']
-        # await services.send_text_message_via_trigger(reference_id)
+        await services.send_text_message_via_trigger(reference_id)
 
 asyncio.create_task(monitor_changes())
