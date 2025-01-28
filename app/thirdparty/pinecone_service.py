@@ -12,8 +12,7 @@ class PineConeDBService:
         Initialize the Pinecone service with the API key from the constants file.
         """
         self.pinecone_client = Pinecone(
-            api_key=constants.PINECONEDB_API_KEY,
-            ssl_verify=False
+            api_key=constants.PINECONEDB_API_KEY
         )
 
     def reinitialize_pinecone_client(self):
